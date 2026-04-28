@@ -1,0 +1,494 @@
+:root {
+    --bg-color: #f8fafc;
+    --card-bg: white;
+    --text-main: #0f172a;
+    --text-h1: #1e293b;
+    --text-h2: #334155;
+    --text-muted: #475569;
+    --text-light: #64748b;
+    --text-lighter: #94a3b8;
+    --primary: #2563eb;
+    --surface-bg: #f1f5f9;
+    --surface-focus: #eff6ff;
+    --minus-bg: #fee2e2;
+    --minus-text: #b91c1c;
+    --plus-bg: #dcfce3;
+    --plus-text: #15803d;
+    --border-color: #e2e8f0;
+}
+
+body.theme-dark {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f8fafc;
+    --text-h1: #f1f5f9;
+    --text-h2: #e2e8f0;
+    --text-muted: #cbd5e1;
+    --text-light: #94a3b8;
+    --text-lighter: #64748b;
+    --primary: #3b82f6;
+    --surface-bg: #334155;
+    --surface-focus: #475569;
+    --minus-bg: #7f1d1d;
+    --minus-text: #fca5a5;
+    --plus-bg: #14532d;
+    --plus-text: #86efac;
+    --border-color: #334155;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.theme-light) {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --text-main: #f8fafc;
+        --text-h1: #f1f5f9;
+        --text-h2: #e2e8f0;
+        --text-muted: #cbd5e1;
+        --text-light: #94a3b8;
+        --text-lighter: #64748b;
+        --primary: #3b82f6;
+        --surface-bg: #334155;
+        --surface-focus: #475569;
+        --minus-bg: #7f1d1d;
+        --minus-text: #fca5a5;
+        --plus-bg: #14532d;
+        --plus-text: #86efac;
+        --border-color: #334155;
+    }
+}
+
+/* Basic styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#app {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+header {
+    text-align: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-h1);
+}
+
+h2 {
+    font-size: 1.25rem;
+    color: var(--text-h2);
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+/* Pace Display Section */
+.pace-display-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.unit-toggle {
+    display: flex;
+    background-color: var(--surface-bg);
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.toggle-btn {
+    border: none;
+    background: transparent;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    min-height: 48px; /* Mobile accessibility */
+}
+
+.toggle-btn.active {
+    background-color: var(--card-bg);
+    color: var(--primary);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.current-pace {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+}
+
+.time-input {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 2.5ch;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+.time-input:focus {
+    outline: none;
+    background: var(--surface-focus);
+    border-radius: 0.5rem;
+}
+
+.unit-label {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text-light);
+    margin-left: 0.25rem;
+}
+
+.converted-pace {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.converted-pace .label {
+    font-weight: 500;
+}
+
+#converted-time {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Controls Section */
+.controls-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.control-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.adjust-btn {
+    flex: 1;
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    padding: 1rem 0;
+    cursor: pointer;
+    min-height: 60px; /* Large tap targets for running */
+    touch-action: manipulation;
+    transition: background-color 0.1s, transform 0.1s;
+}
+
+.adjust-btn:active {
+    transform: scale(0.95);
+}
+
+.adjust-btn.minus {
+    background-color: var(--minus-bg);
+    color: var(--minus-text);
+}
+
+.adjust-btn.plus {
+    background-color: var(--plus-bg);
+    color: var(--plus-text);
+}
+
+/* Race Times Section */
+.race-times-section {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.race-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.race-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--surface-bg);
+}
+
+.race-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.race-name {
+    font-weight: 500;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.race-time {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-main);
+}
+
+.race-time-input {
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-main);
+    background: transparent;
+    border: none;
+    text-align: right;
+    width: 6ch;
+    padding: 0;
+    margin: 0;
+}
+.race-time-input:focus {
+    outline: none;
+    background: var(--surface-focus);
+    border-radius: 0.25rem;
+}
+
+@media (min-width: 480px) {
+    .race-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+}
+
+/* Tabs */
+.tab-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.tab-nav-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-nav-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* Distance Converter */
+.distance-converter-section {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.distance-inputs-simple {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.dist-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.dist-input {
+    width: 100%;
+    max-width: 120px;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+    border: none;
+    background: transparent;
+    padding: 0;
+    -moz-appearance: textfield;
+}
+
+.dist-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    background: var(--surface-bg);
+    padding: 1rem 0.5rem;
+    border-radius: 1rem;
+    box-sizing: border-box;
+}
+
+.dist-input:focus {
+    outline: none;
+}
+
+.dist-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+    margin-top: 0.5rem;
+}
+
+.dist-equals {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-lighter);
+    margin-top: -1rem; /* slightly adjust up to align with inputs visually */
+}
+
+/* Theme Button styles */
+.theme-btn {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.theme-btn:hover {
+    background: var(--surface-bg);
+}
+
+#tab-distance .race-grid {
+    grid-template-columns: 1fr;
+}
+
+#tab-distance .race-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    text-align: right;
+    gap: 0.5rem;
+}
+
+#tab-distance .race-item span:first-child {
+    text-align: left;
+}
+
+#tab-distance .race-item.header {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.distance-row {
+    cursor: pointer;
+    transition: background-color 0.1s, transform 0.1s;
+    border-radius: 0.5rem;
+    padding: 0.75rem 0.5rem;
+    margin: -0.75rem -0.5rem; /* Offset padding */
+}
+
+.distance-row:active {
+    background-color: var(--surface-bg);
+    transform: scale(0.98);
+}
+
+.less-common {
+    display: none !important;
+}
+
+.show-all .less-common {
+    display: grid !important;
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+.full-width {
+    width: 100%;
+}
+.mt-1 {
+    margin-top: 1rem;
+}
+.surface-bg {
+    background-color: var(--surface-bg);
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--text-main);
+    color: var(--bg-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+    z-index: 1000;
+    font-weight: 500;
+}
+
+.toast-btn {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}

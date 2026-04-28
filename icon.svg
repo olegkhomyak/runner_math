@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#04122C" /> <stop offset="45%" stop-color="#0B3C88" /> <stop offset="100%" stop-color="#0066FF" /> </linearGradient>
+
+    <linearGradient id="trackGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0" />
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect x="44" y="44" width="424" height="424" rx="95" ry="95" fill="url(#bgGrad)" filter="url(#shadow)" />
+
+  <path d="M 60 360 Q 256 420 452 280" stroke="url(#trackGrad)" stroke-width="6" stroke-linecap="round" fill="none" />
+
+  <g transform="translate(120, 130) rotate(15)" opacity="0.12" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round">
+    <line x1="-16" y1="0" x2="16" y2="0"/>
+    <line x1="0" y1="-16" x2="0" y2="16"/>
+  </g>
+
+  <g transform="translate(380, 140) rotate(-10)" opacity="0.12">
+    <line x1="-18" y1="0" x2="18" y2="0" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="0" cy="-18" r="6" fill="#FFFFFF"/>
+    <circle cx="0" cy="18" r="6" fill="#FFFFFF"/>
+  </g>
+
+  <g transform="translate(390, 360) rotate(-20)" opacity="0.12" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round">
+    <line x1="-18" y1="-8" x2="18" y2="-8"/>
+    <line x1="-18" y1="8" x2="18" y2="8"/>
+  </g>
+
+  <g transform="translate(140, 360) rotate(45)" opacity="0.12" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round">
+    <line x1="-14" y1="0" x2="14" y2="0"/>
+    <line x1="0" y1="-14" x2="0" y2="14"/>
+  </g>
+
+  <g transform="translate(8, 12) scale(1.05)">
+    
+    <path d="M 265 190 L 225 225 L 245 170" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
+
+    <path d="M 250 270 L 195 305 L 145 345" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
+
+    <path d="M 265 190 Q 275 230 250 270" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" fill="none"/>
+
+    <path d="M 250 270 L 315 255 L 325 330" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <path d="M 265 190 L 305 225 L 335 185" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <circle cx="285" cy="130" r="26" fill="#FFFFFF"/>
+  </g>
+</svg>
