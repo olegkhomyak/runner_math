@@ -3,6 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // State
     let currentUnit = 'mi'; // 'mi' or 'km'
     let currentPaceSeconds = 8 * 60; // Default to 8:00 min/mi
+    const MIN_PACE_SECS = 1;
+    const MAX_PACE_SECS = 3599; // 59:59
+
+    function clampPace(pace) {
+        if (isNaN(pace)) return MIN_PACE_SECS;
+        return Math.max(MIN_PACE_SECS, Math.min(MAX_PACE_SECS, pace));
+    }
 
     // DOM Elements
     const btnMi = document.getElementById('btn-mi');
@@ -67,10 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     btnMi.addEventListener('click', () => {
         if (currentUnit === 'mi') {
-            currentPaceSeconds = Math.round(window.logic.convertPace(currentPaceSeconds, 'mi'));
+            currentPaceSeconds = clampPace(Math.round(window.logic.convertPace(currentPaceSeconds, 'mi')));
             currentUnit = 'km';
         } else {
-            currentPaceSeconds = Math.round(window.logic.convertPace(currentPaceSeconds, 'km'));
+            currentPaceSeconds = clampPace(Math.round(window.logic.convertPace(currentPaceSeconds, 'km')));
             currentUnit = 'mi';
         }
         updateUI();
@@ -78,10 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnKm.addEventListener('click', () => {
         if (currentUnit === 'km') {
-            currentPaceSeconds = Math.round(window.logic.convertPace(currentPaceSeconds, 'km'));
+            currentPaceSeconds = clampPace(Math.round(window.logic.convertPace(currentPaceSeconds, 'km')));
             currentUnit = 'mi';
         } else {
-            currentPaceSeconds = Math.round(window.logic.convertPace(currentPaceSeconds, 'mi'));
+            currentPaceSeconds = clampPace(Math.round(window.logic.convertPace(currentPaceSeconds, 'mi')));
             currentUnit = 'km';
         }
         updateUI();
@@ -90,13 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     adjustBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             const adj = parseInt(e.target.dataset.adj, 10);
-            currentPaceSeconds += adj;
-            
-            // Prevent negative pace
-            if (currentPaceSeconds < 1) {
-                currentPaceSeconds = 1;
-            }
-            
+            currentPaceSeconds = clampPace(currentPaceSeconds + adj);
             updateUI();
         });
     });
@@ -113,9 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (s < 0) s = 0;
         if (m < 0) m = 0;
 
-        currentPaceSeconds = (m * 60) + s;
-        if (currentPaceSeconds < 1) currentPaceSeconds = 1;
-
+        currentPaceSeconds = clampPace((m * 60) + s);
         updateUI();
     }
 
@@ -135,9 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalSecs = window.logic.parseTime(val);
             if (totalSecs > 0) {
                 const distanceKm = window.logic.raceDistancesKm[distKey];
-                const requiredPaceSecs = window.logic.calculatePaceFromTimeAndDistance(totalSecs, distanceKm, currentUnit);
+                const requiredPaceSecs = Math.round(window.logic.calculatePaceFromTimeAndDistance(totalSecs, distanceKm, currentUnit));
                 
-                currentPaceSeconds = Math.round(requiredPaceSecs);
+                if (requiredPaceSecs >= MIN_PACE_SECS && requiredPaceSecs <= MAX_PACE_SECS) {
+                    currentPaceSeconds = requiredPaceSecs;
+                }
                 updateUI();
             } else {
                 updateUI(); // reset on invalid input
