@@ -1,4 +1,4 @@
-const CACHE_NAME = 'runner-math-v0.1';
+const CACHE_NAME = 'runner-math-v0.1.1';
 const urlsToCache = [
   './',
   './index.html',

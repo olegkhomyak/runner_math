@@ -66,19 +66,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listeners
     btnMi.addEventListener('click', () => {
-        if (currentUnit !== 'mi') {
-            currentPaceSeconds = Math.round(window.logic.convertPace(currentPaceSeconds, currentUnit));
+        if (currentUnit === 'mi') {
+            currentPaceSeconds = Math.round(window.logic.convertPace(currentPaceSeconds, 'mi'));
+            currentUnit = 'km';
+        } else {
+            currentPaceSeconds = Math.round(window.logic.convertPace(currentPaceSeconds, 'km'));
             currentUnit = 'mi';
-            updateUI();
         }
+        updateUI();
     });
 
     btnKm.addEventListener('click', () => {
-        if (currentUnit !== 'km') {
-            currentPaceSeconds = Math.round(window.logic.convertPace(currentPaceSeconds, currentUnit));
+        if (currentUnit === 'km') {
+            currentPaceSeconds = Math.round(window.logic.convertPace(currentPaceSeconds, 'km'));
+            currentUnit = 'mi';
+        } else {
+            currentPaceSeconds = Math.round(window.logic.convertPace(currentPaceSeconds, 'mi'));
             currentUnit = 'km';
-            updateUI();
         }
+        updateUI();
     });
 
     adjustBtns.forEach(btn => {
@@ -145,25 +151,59 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabBtns = document.querySelectorAll('.tab-nav-btn');
     const tabViews = document.querySelectorAll('.tab-view');
 
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            tabBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            const targetId = btn.dataset.target;
-            tabViews.forEach(view => {
-                if (view.id === targetId) {
-                    view.style.display = 'block';
-                    view.classList.add('active');
-                    view.classList.remove('hidden');
-                } else {
-                    view.style.display = 'none';
-                    view.classList.remove('active');
-                    view.classList.add('hidden');
-                }
-            });
+    function switchTab(targetId) {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        const activeBtn = Array.from(tabBtns).find(b => b.dataset.target === targetId);
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        tabViews.forEach(view => {
+            if (view.id === targetId) {
+                view.style.display = 'block';
+                view.classList.add('active');
+                view.classList.remove('hidden');
+            } else {
+                view.style.display = 'none';
+                view.classList.remove('active');
+                view.classList.add('hidden');
+            }
         });
+    }
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.target));
     });
+
+    // Swipe to change tabs
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const mainArea = document.querySelector('main');
+
+    mainArea.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    mainArea.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+        const threshold = 50; // minimum distance to be considered a swipe
+        const activeTab = document.querySelector('.tab-view.active');
+        if (!activeTab) return;
+
+        if (touchStartX - touchEndX > threshold) {
+            // Swipe Left
+            if (activeTab.id === 'tab-pace') {
+                switchTab('tab-distance');
+            }
+        } else if (touchEndX - touchStartX > threshold) {
+            // Swipe Right
+            if (activeTab.id === 'tab-distance') {
+                switchTab('tab-pace');
+            }
+        }
+    }
 
     // Distance Converter
     const inputDistMiles = document.getElementById('input-miles');
@@ -216,9 +256,9 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleDistancesBtn.addEventListener('click', () => {
         distanceGrid.classList.toggle('show-all');
         if (distanceGrid.classList.contains('show-all')) {
-            toggleDistancesBtn.textContent = 'Show Less Distances';
+            toggleDistancesBtn.textContent = 'Show Fewer Distances';
         } else {
-            toggleDistancesBtn.textContent = 'Show All Distances';
+            toggleDistancesBtn.textContent = 'Show More Distances';
         }
     });
 
