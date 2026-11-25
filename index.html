@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Runner Math</title>
 
     <!-- SEO & Meta Tags -->
@@ -28,7 +28,7 @@
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
     <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
-    <meta name="theme-color" id="meta-theme-color" content="#2563eb">
+    <meta name="theme-color" id="meta-theme-color" content="#eef2f7">
     <script>
         // Initialize theme early on <html> (:root) to prevent flash of wrong theme or icon
         (function() {
@@ -40,7 +40,7 @@
             const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
             document.documentElement.classList.add(isDark ? 'theme-dark' : 'theme-light');
             const metaTheme = document.getElementById('meta-theme-color');
-            if (metaTheme) metaTheme.setAttribute('content', isDark ? '#0f172a' : '#2563eb');
+            if (metaTheme) metaTheme.setAttribute('content', isDark ? '#0b1120' : '#eef2f7');
         })();
     </script>
 </head>
@@ -49,125 +49,179 @@
         <span>Update Available!</span>
         <button type="button" id="btn-refresh" class="toast-btn">Refresh</button>
     </div>
+
     <div id="app">
-        <header>
-            <button type="button" id="theme-toggle" class="theme-btn" aria-label="Toggle dark mode" aria-pressed="false">
-                <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-            </button>
-            <h1>Runner Math <span class="version-badge">v1.2</span></h1>
+        <header class="app-header">
+            <div class="header-top">
+                <div class="brand">
+                    <span class="brand-mark" aria-hidden="true">
+                        <svg viewBox="0 0 32 32" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5.5 9.5C8.8 10 11.4 12.1 12.7 14.7C13.3 14.3 14 13.8 14.6 13.8C15.3 13.8 15.8 14.6 16 15.4C17.4 16.6 18.9 17.9 20.2 18.8C21.3 19.6 22.4 20.1 22.7 21C22.9 21.5 22.2 22.1 21 22.2C18.3 22.4 15.1 21.5 12.1 19.7C9.8 18.3 8 17 6.8 15.8C6.4 15.4 6.5 14.6 7.1 14.2C5.8 14 4.8 13.3 4.3 12.5C5.8 12.6 7.3 12.9 8.6 13.5C6.7 12.7 5.2 11.7 4.5 10.6C6.2 10.9 8 11.5 9.6 12.3C7.6 11.3 6.1 10.3 5.5 9.5Z" fill="currentColor"/>
+                            <path d="M6.4 16.8C7.9 18.2 10.1 19.6 12.5 20.9C15.5 22.5 18.8 23.1 21.8 22.8C22.5 22.7 22.8 23.2 22.3 23.7C20.9 24.4 17.6 24.3 13.9 22.8C10.9 21.5 8.2 19.7 6.1 17.9C5.7 17.5 6 16.9 6.4 16.8Z" fill="currentColor" opacity="0.75"/>
+                            <circle cx="25.5" cy="9.5" r="2.5" fill="#fb923c"/>
+                        </svg>
+                    </span>
+                    <h1>Runner Math <span class="version-badge">v1.2</span></h1>
+                </div>
+
+                <button type="button" id="theme-toggle" class="theme-btn" aria-label="Toggle dark mode" aria-pressed="false">
+                    <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                </button>
+            </div>
+
             <div class="tab-navigation" role="tablist" aria-label="Calculator modes">
-                <button type="button" id="tab-btn-pace" class="tab-nav-btn active" role="tab" aria-selected="true" aria-controls="tab-pace" data-target="tab-pace">Pace</button>
-                <button type="button" id="tab-btn-distance" class="tab-nav-btn" role="tab" aria-selected="false" aria-controls="tab-distance" data-target="tab-distance" tabindex="-1">Distance</button>
+                <button type="button" id="tab-btn-pace" class="tab-nav-btn active" role="tab" aria-selected="true" aria-controls="tab-pace" data-target="tab-pace">
+                    <svg class="tab-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2.5"></path><path d="M9 2h6"></path></svg>
+                    <span>Pace</span>
+                </button>
+                <button type="button" id="tab-btn-distance" class="tab-nav-btn" role="tab" aria-selected="false" aria-controls="tab-distance" data-target="tab-distance" tabindex="-1">
+                    <svg class="tab-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"></circle><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path><circle cx="18" cy="5" r="3"></circle></svg>
+                    <span>Distance</span>
+                </button>
             </div>
         </header>
 
         <main>
             <div id="tab-pace" class="tab-view active" role="tabpanel" aria-labelledby="tab-btn-pace">
-                <div class="pace-display-section">
-                    <div class="unit-toggle" role="group" aria-label="Pace unit">
-                        <button type="button" id="btn-mi" class="toggle-btn active" aria-pressed="true">min/mi</button>
-                        <button type="button" id="btn-km" class="toggle-btn" aria-pressed="false">min/km</button>
-                    </div>
-
-                    <div class="current-pace">
-                        <input type="text" inputmode="numeric" enterkeyhint="done" maxlength="2" id="input-minutes" class="time-input" aria-label="Pace minutes" value="08"><span class="pace-colon" aria-hidden="true">:</span><input type="text" inputmode="numeric" enterkeyhint="done" maxlength="2" id="input-seconds" class="time-input" aria-label="Pace seconds" value="00">
-                        <span class="unit-label" id="display-unit">/mi</span>
-                    </div>
-
-                    <div class="pace-meta">
-                        <div class="converted-pace">
-                            <span class="label">Equals:</span>
-                            <span id="converted-time">04:58</span> <span id="converted-unit">/km</span>
-                        </div>
-                        <div class="treadmill-speed" role="group" aria-label="Treadmill speed">
-                            <span class="label">Speed:</span>
-                            <span class="speed-field">
-                                <input type="text" inputmode="decimal" enterkeyhint="done" id="input-mph" class="speed-input" aria-label="Speed in miles per hour" value="7.5">
-                                <label for="input-mph" class="speed-unit">mph</label>
+                <section class="pace-console" aria-label="Pace console">
+                    <div class="pace-display-section">
+                        <div class="console-bar">
+                            <span class="console-eyebrow">
+                                <span class="eyebrow-dot" aria-hidden="true"></span>
+                                Current Pace
                             </span>
-                            <span class="meta-sep" aria-hidden="true">·</span>
-                            <span class="speed-field">
-                                <input type="text" inputmode="decimal" enterkeyhint="done" id="input-kmh" class="speed-input" aria-label="Speed in kilometers per hour" value="12.1">
-                                <label for="input-kmh" class="speed-unit">km/h</label>
-                            </span>
+                            <div class="unit-toggle" role="group" aria-label="Pace unit">
+                                <button type="button" id="btn-mi" class="toggle-btn active" aria-pressed="true">min/mi</button>
+                                <button type="button" id="btn-km" class="toggle-btn" aria-pressed="false">min/km</button>
+                            </div>
+                        </div>
+
+                        <div class="current-pace">
+                            <input type="text" inputmode="numeric" enterkeyhint="done" maxlength="2" id="input-minutes" class="time-input" aria-label="Pace minutes" value="08"><span class="pace-colon" aria-hidden="true">:</span><input type="text" inputmode="numeric" enterkeyhint="done" maxlength="2" id="input-seconds" class="time-input" aria-label="Pace seconds" value="00">
+                            <span class="unit-label" id="display-unit">/mi</span>
+                        </div>
+
+                        <div class="pace-meta">
+                            <div class="converted-pace">
+                                <span class="label">Equals</span>
+                                <span class="converted-readout">
+                                    <span id="converted-time">04:58</span><span id="converted-unit">/km</span>
+                                </span>
+                            </div>
+                            <div class="treadmill-speed" role="group" aria-label="Treadmill speed">
+                                <label for="input-mph" class="speed-field">
+                                    <span class="speed-unit">Speed · mph</span>
+                                    <input type="text" inputmode="decimal" enterkeyhint="done" id="input-mph" class="speed-input" aria-label="Speed in miles per hour" value="7.5">
+                                </label>
+                                <label for="input-kmh" class="speed-field">
+                                    <span class="speed-unit">Speed · km/h</span>
+                                    <input type="text" inputmode="decimal" enterkeyhint="done" id="input-kmh" class="speed-input" aria-label="Speed in kilometers per hour" value="12.1">
+                                </label>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="controls-section" role="group" aria-label="Adjust pace">
-                    <div class="control-row">
-                        <button type="button" class="adjust-btn plus" data-adj="60" aria-label="Add 1 minute">+1m</button>
-                        <button type="button" class="adjust-btn plus" data-adj="5" aria-label="Add 5 seconds">+5s</button>
-                        <button type="button" class="adjust-btn plus" data-adj="1" aria-label="Add 1 second">+1s</button>
+                    <div class="controls-section" role="group" aria-label="Adjust pace">
+                        <div class="control-row">
+                            <button type="button" class="adjust-btn plus" data-adj="60" aria-label="Add 1 minute"><span class="adj-sign" aria-hidden="true">+</span>1m</button>
+                            <button type="button" class="adjust-btn plus" data-adj="5" aria-label="Add 5 seconds"><span class="adj-sign" aria-hidden="true">+</span>5s</button>
+                            <button type="button" class="adjust-btn plus" data-adj="1" aria-label="Add 1 second"><span class="adj-sign" aria-hidden="true">+</span>1s</button>
+                        </div>
+                        <div class="control-row">
+                            <button type="button" class="adjust-btn minus" data-adj="-60" aria-label="Subtract 1 minute"><span class="adj-sign" aria-hidden="true">&minus;</span>1m</button>
+                            <button type="button" class="adjust-btn minus" data-adj="-5" aria-label="Subtract 5 seconds"><span class="adj-sign" aria-hidden="true">&minus;</span>5s</button>
+                            <button type="button" class="adjust-btn minus" data-adj="-1" aria-label="Subtract 1 second"><span class="adj-sign" aria-hidden="true">&minus;</span>1s</button>
+                        </div>
                     </div>
-                    <div class="control-row">
-                        <button type="button" class="adjust-btn minus" data-adj="-60" aria-label="Subtract 1 minute">-1m</button>
-                        <button type="button" class="adjust-btn minus" data-adj="-5" aria-label="Subtract 5 seconds">-5s</button>
-                        <button type="button" class="adjust-btn minus" data-adj="-1" aria-label="Subtract 1 second">-1s</button>
-                    </div>
-                </div>
+                </section>
 
-                <div class="race-times-section">
+                <section class="race-times-section" aria-labelledby="heading-race-times">
                     <div class="section-header">
-                        <h2>Race Times</h2>
-                        <p class="section-hint">Tap a time &amp; type digits to set pace</p>
+                        <h2 id="heading-race-times">Race Times</h2>
+                        <p class="section-hint">Tap a split &amp; type digits to set pace</p>
                     </div>
                     <div class="race-grid">
                         <div class="race-item">
-                            <label class="race-name" for="input-time-5k">5K</label>
+                            <div class="race-card-top">
+                                <label class="race-name" for="input-time-5k">5K</label>
+                                <svg class="edit-cue" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                            </div>
                             <input type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" class="race-time-input" id="input-time-5k" data-dist="5k" placeholder="MM:SS">
                         </div>
                         <div class="race-item">
-                            <label class="race-name" for="input-time-10k">10K</label>
+                            <div class="race-card-top">
+                                <label class="race-name" for="input-time-10k">10K</label>
+                                <svg class="edit-cue" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                            </div>
                             <input type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" class="race-time-input" id="input-time-10k" data-dist="10k" placeholder="MM:SS">
                         </div>
                         <div class="race-item">
-                            <label class="race-name" for="input-time-half">Half Marathon</label>
+                            <div class="race-card-top">
+                                <label class="race-name" for="input-time-half">Half Marathon</label>
+                                <svg class="edit-cue" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                            </div>
                             <input type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" class="race-time-input" id="input-time-half" data-dist="half" placeholder="H:MM:SS">
                         </div>
                         <div class="race-item">
-                            <label class="race-name" for="input-time-full">Marathon</label>
+                            <div class="race-card-top">
+                                <label class="race-name" for="input-time-full">Marathon</label>
+                                <svg class="edit-cue" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                            </div>
                             <input type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" class="race-time-input" id="input-time-full" data-dist="full" placeholder="H:MM:SS">
                         </div>
                         <div class="race-item custom-race-item">
-                            <div class="custom-dist-controls">
-                                <label class="race-name" for="input-custom-dist">Custom</label>
-                                <input type="text" inputmode="decimal" enterkeyhint="done" id="input-custom-dist" class="custom-dist-input" aria-label="Custom distance value" value="10">
-                                <button type="button" id="btn-custom-unit" class="custom-unit-btn" aria-label="Custom distance unit: miles. Activate to switch.">mi</button>
+                            <div class="custom-dist-group">
+                                <label class="race-name" for="input-custom-dist">Custom Distance</label>
+                                <div class="custom-dist-controls">
+                                    <input type="text" inputmode="decimal" enterkeyhint="done" id="input-custom-dist" class="custom-dist-input" aria-label="Custom distance value" value="10">
+                                    <button type="button" id="btn-custom-unit" class="custom-unit-btn" aria-label="Custom distance unit: miles. Activate to switch.">mi</button>
+                                </div>
                             </div>
-                            <input type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" id="input-time-custom" class="race-time-input" aria-label="Custom distance finish time" placeholder="H:MM:SS">
+                            <div class="custom-time-group">
+                                <label class="race-name custom-time-label" for="input-time-custom">Finish Time</label>
+                                <input type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" id="input-time-custom" class="race-time-input custom-time-input" aria-label="Custom distance finish time" placeholder="H:MM:SS">
+                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
             </div>
 
             <div id="tab-distance" class="tab-view hidden" role="tabpanel" aria-labelledby="tab-btn-distance">
-                <div class="distance-converter-section">
+                <section class="distance-converter-section" aria-label="Distance converter">
+                    <div class="console-bar distance-bar">
+                        <span class="console-eyebrow">
+                            <span class="eyebrow-dot" aria-hidden="true"></span>
+                            Convert Distance
+                        </span>
+                    </div>
                     <div class="distance-inputs-simple">
-                        <div class="dist-input-group">
+                        <label class="dist-input-group" for="input-miles">
+                            <span class="dist-label">Miles</span>
                             <input type="text" inputmode="decimal" enterkeyhint="done" id="input-miles" class="dist-input" placeholder="0">
-                            <label class="dist-label" for="input-miles">Miles</label>
-                        </div>
+                        </label>
                         <div class="dist-equals" aria-hidden="true">=</div>
-                        <div class="dist-input-group">
+                        <label class="dist-input-group" for="input-km">
+                            <span class="dist-label">Kilometers</span>
                             <input type="text" inputmode="decimal" enterkeyhint="done" id="input-km" class="dist-input" placeholder="0">
-                            <label class="dist-label" for="input-km">Km</label>
-                        </div>
+                        </label>
                     </div>
                     <div id="dist-pace-summary" class="dist-pace-summary hidden" aria-live="polite">
-                        <span>Finish time at <strong id="dist-summary-pace">08:00/mi</strong>:</span>
+                        <span class="summary-label">Finish time at <strong id="dist-summary-pace">08:00/mi</strong></span>
                         <strong id="dist-summary-time" class="dist-finish-time">--:--</strong>
                     </div>
-                </div>
+                </section>
 
-                <div class="race-times-section">
-                    <h2>Common Distances</h2>
-                    <div class="race-grid" id="distance-grid">
-                        <div class="race-item header" aria-hidden="true">
-                            <span class="race-name">Event</span>
-                            <span class="race-time">Miles</span>
-                            <span class="race-time">Km</span>
+                <section class="race-times-section" aria-labelledby="heading-common-distances">
+                    <div class="section-header">
+                        <h2 id="heading-common-distances">Common Distances</h2>
+                        <p class="section-hint">Tap an event to convert</p>
+                    </div>
+                    <div class="distance-table" id="distance-grid">
+                        <div class="distance-table-header" aria-hidden="true">
+                            <span>Event</span>
+                            <span>Miles</span>
+                            <span>Km</span>
                         </div>
                         <div class="race-item distance-row less-common" role="button" tabindex="0" data-km="1.5"><span class="race-name">1500m</span><span class="race-time">0.93</span><span class="race-time">1.5</span></div>
                         <div class="race-item distance-row less-common" role="button" tabindex="0" data-mi="1"><span class="race-name">1 Mile</span><span class="race-time">1.0</span><span class="race-time">1.61</span></div>
@@ -182,8 +236,8 @@
                         <div class="race-item distance-row less-common" role="button" tabindex="0" data-km="100"><span class="race-name">100K</span><span class="race-time">62.14</span><span class="race-time">100.0</span></div>
                         <div class="race-item distance-row less-common" role="button" tabindex="0" data-mi="100"><span class="race-name">100 Mile</span><span class="race-time">100.0</span><span class="race-time">160.93</span></div>
                     </div>
-                    <button type="button" id="toggle-distances-btn" class="toggle-btn full-width mt-1 surface-bg" aria-expanded="false" aria-controls="distance-grid">Show All Distances</button>
-                </div>
+                    <button type="button" id="toggle-distances-btn" class="expand-distances-btn" aria-expanded="false" aria-controls="distance-grid">Show All Distances</button>
+                </section>
             </div>
         </main>
     </div>

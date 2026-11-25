@@ -1,5 +1,5 @@
 // Keep version synced with .version-badge in index.html
-const CACHE_NAME = 'runner-math-v1.2-4';
+const CACHE_NAME = 'runner-math-v1.2-5';
 const urlsToCache = [
   './',
   './index.html',

@@ -625,7 +625,7 @@ document.addEventListener('DOMContentLoaded', () => {
         root.classList.toggle('theme-light', !isDark);
         themeToggleBtn.setAttribute('aria-pressed', String(isDark));
         if (metaThemeColor) {
-            metaThemeColor.setAttribute('content', isDark ? '#0f172a' : '#2563eb');
+            metaThemeColor.setAttribute('content', isDark ? '#0b1120' : '#eef2f7');
         }
     }
 
