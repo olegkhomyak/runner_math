@@ -54,4 +54,17 @@ assert.equal(logic.parseTime('-5:00'), 0);
 assert.equal(logic.parseTime('25:'), 0);
 assert.equal(logic.parseTime('abc'), 0);
 
+// 8. Live stopwatch digit formatting for mobile numeric keypad
+assert.equal(logic.formatTimeInput(''), '');
+assert.equal(logic.formatTimeInput('0'), '');
+assert.equal(logic.formatTimeInput('2'), '0:02');
+assert.equal(logic.formatTimeInput('0:020'), '0:20');
+assert.equal(logic.formatTimeInput('0:200'), '2:00');
+assert.equal(logic.formatTimeInput('2:000'), '20:00');
+assert.equal(logic.formatTimeInput('14500'), '1:45:00');
+assert.equal(logic.formatTimeInput('10500'), '1:05:00');
+assert.equal(logic.formatTimeInput('103000'), '10:30:00');
+assert.equal(logic.formatTimeInput('20:0'), '2:00', 'Backspace from 20:00 -> 2:00');
+assert.equal(logic.formatTimeInput('0:0'), '', 'Backspace from 0:02 -> empty');
+
 console.log('All strict unit tests passed!');

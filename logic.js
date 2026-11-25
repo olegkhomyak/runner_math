@@ -88,6 +88,23 @@ function formatTime(totalSeconds) {
     return `${paddedM}:${paddedS}`;
 }
 
+// Live right-to-left stopwatch formatter for numeric keypads ("2" -> "0:02", "2000" -> "20:00", "13000" -> "1:30:00")
+function formatTimeInput(rawStr) {
+    if (typeof rawStr !== 'string') return '';
+    const digits = rawStr.replace(/\D/g, '').replace(/^0+/, '').slice(0, 6);
+    if (!digits) return '';
+
+    const padded = digits.padStart(3, '0');
+    const ss = padded.slice(-2);
+    const mm = padded.slice(Math.max(0, padded.length - 4), -2);
+    const hh = padded.length > 4 ? padded.slice(0, -4) : '';
+
+    if (hh) {
+        return `${hh}:${mm.padStart(2, '0')}:${ss}`;
+    }
+    return `${mm}:${ss}`;
+}
+
 // Parse time strings like "HH:MM:SS", "MM:SS", or mobile digit-only inputs ("2000" -> 20:00, "13000" -> 1:30:00)
 function parseTime(timeStr) {
     if (typeof timeStr !== 'string') return 0;
@@ -132,6 +149,7 @@ const exported = {
     convertMilesToKm,
     convertKmToMiles,
     formatTime,
+    formatTimeInput,
     parseTime,
     raceDistancesKm
 };

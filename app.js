@@ -295,41 +295,80 @@ document.addEventListener('DOMContentLoaded', () => {
         activeStopHandlers.forEach(stop => stop());
     });
 
-    // Live & committed pace input handling
+    // Reliable select-on-focus helper that prevents mobile mouseup caret collapse
+    function bindSelectOnFocus(el) {
+        let justFocused = false;
+        el.addEventListener('focus', () => {
+            justFocused = true;
+            setTimeout(() => el.select(), 0);
+        });
+        el.addEventListener('mouseup', e => {
+            if (justFocused) {
+                e.preventDefault();
+                justFocused = false;
+            }
+        });
+        el.addEventListener('blur', () => {
+            justFocused = false;
+        });
+    }
+
+    // Live & committed pace input handling (clears to placeholder on focus for easy one-handed entry)
     function parseManualPaceInputs() {
-        let m = parseInt(inputMinutes.value, 10);
-        let s = parseInt(inputSeconds.value, 10);
+        const minRaw = inputMinutes.value !== '' ? inputMinutes.value : inputMinutes.placeholder;
+        const secRaw = inputSeconds.value !== '' ? inputSeconds.value : inputSeconds.placeholder;
+        let m = parseInt(minRaw, 10);
+        let s = parseInt(secRaw, 10);
         if (isNaN(m) || m < 0) m = 0;
         if (isNaN(s) || s < 0) s = 0;
         if (s > 59) s = 59;
         return (m * 60) + s;
     }
 
-    function handlePaceLiveInput() {
+    function handlePaceLiveInput(e) {
+        const el = e.target;
+        const digits = el.value.replace(/\D/g, '').slice(0, 2);
+        if (el.value !== digits) {
+            el.value = digits;
+        }
         const rawSecs = parseManualPaceInputs();
         if (rawSecs >= MIN_PACE_SECS) {
             setPaceFromEdit(rawSecs);
             updateUI({ preserveActiveInput: true });
         }
+        // Auto-advance from minutes to seconds after typing 2 digits
+        if (el === inputMinutes && digits.length === 2) {
+            inputSeconds.focus();
+        }
     }
 
     function handlePaceCommit() {
         setPaceFromEdit(parseManualPaceInputs());
-        updateUI();
+        // Defer slightly so auto-advancing minutes -> seconds keeps seconds empty on focus
+        setTimeout(() => {
+            if (document.activeElement !== inputMinutes && document.activeElement !== inputSeconds) {
+                updateUI();
+            } else {
+                updateUI({ preserveActiveInput: true });
+            }
+        }, 0);
     }
 
-    inputMinutes.addEventListener('input', handlePaceLiveInput);
-    inputSeconds.addEventListener('input', handlePaceLiveInput);
-    inputMinutes.addEventListener('change', handlePaceCommit);
-    inputSeconds.addEventListener('change', handlePaceCommit);
-    inputMinutes.addEventListener('blur', handlePaceCommit);
-    inputSeconds.addEventListener('blur', handlePaceCommit);
+    [inputMinutes, inputSeconds].forEach(el => {
+        el.addEventListener('focus', () => {
+            if (el.value) {
+                el.placeholder = el.value;
+                el.value = '';
+            }
+        });
+        el.addEventListener('input', handlePaceLiveInput);
+        el.addEventListener('blur', handlePaceCommit);
+    });
 
     inputMinutes.addEventListener('keydown', e => {
         if (e.key === ':') {
             e.preventDefault();
             inputSeconds.focus();
-            inputSeconds.select();
         } else if (e.key === 'Enter') {
             e.target.blur();
         }
@@ -337,9 +376,6 @@ document.addEventListener('DOMContentLoaded', () => {
     inputSeconds.addEventListener('keydown', e => {
         if (e.key === 'Enter') e.target.blur();
     });
-
-    inputMinutes.addEventListener('focus', () => inputMinutes.select());
-    inputSeconds.addEventListener('focus', () => inputSeconds.select());
 
     // Treadmill speed inputs (mph & km/h)
     function handleSpeedInput(inputEl, speedUnit, commit) {
@@ -360,28 +396,70 @@ document.addEventListener('DOMContentLoaded', () => {
         el.addEventListener('input', () => handleSpeedInput(el, unit, false));
         el.addEventListener('change', () => handleSpeedInput(el, unit, true));
         el.addEventListener('blur', () => handleSpeedInput(el, unit, true));
-        el.addEventListener('focus', () => el.select());
+        bindSelectOnFocus(el);
         el.addEventListener('keydown', e => {
             if (e.key === 'Enter') e.target.blur();
         });
     });
 
-    // Reverse Pace Calculator (Standard Race Times)
-    raceTimeInputs.forEach(input => {
-        input.addEventListener('change', e => {
-            const totalSecs = window.logic.parseTime(e.target.value);
-            const distKey = e.target.dataset.dist;
-            if (totalSecs > 0 && window.logic.raceDistancesKm[distKey]) {
-                const distanceKm = window.logic.raceDistancesKm[distKey];
+    // Stopwatch-style Race Time inputs (giant numeric keypad + live automatic colons while typing)
+    function bindStopwatchTimeInput(input, getDistanceKm) {
+        function snapCaretToEnd() {
+            try {
+                const len = input.value.length;
+                input.setSelectionRange(len, len);
+            } catch (err) {}
+        }
+
+        input.addEventListener('focus', () => {
+            if (input.value) {
+                input.placeholder = input.value;
+                input.value = '';
+            }
+        });
+
+        input.addEventListener('input', () => {
+            const formatted = window.logic.formatTimeInput(input.value);
+            if (input.value !== formatted) {
+                input.value = formatted;
+            }
+            snapCaretToEnd();
+        });
+
+        input.addEventListener('click', snapCaretToEnd);
+
+        input.addEventListener('blur', () => {
+            const distanceKm = getDistanceKm();
+            const totalSecs = window.logic.parseTime(input.value);
+            if (distanceKm > 0 && totalSecs > 0) {
                 const requiredPaceSecs = window.logic.calculatePaceFromTimeAndDistance(totalSecs, distanceKm, currentUnit);
                 setPaceFromEdit(requiredPaceSecs);
             }
             updateUI();
         });
-        input.addEventListener('focus', () => input.select());
+
         input.addEventListener('keydown', e => {
-            if (e.key === 'Enter') e.target.blur();
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                input.blur();
+            }
         });
+    }
+
+    raceTimeInputs.forEach(input => {
+        const distKey = input.dataset.dist;
+        bindStopwatchTimeInput(input, () => window.logic.raceDistancesKm[distKey] || 0);
+
+        // Make the entire race row tappable while running
+        const row = input.closest('.race-item');
+        if (row) {
+            row.style.cursor = 'pointer';
+            row.addEventListener('click', e => {
+                if (e.target !== input) {
+                    input.focus();
+                }
+            });
+        }
     });
 
     // Custom Distance Row
@@ -389,7 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI({ preserveActiveInput: true });
     });
     inputCustomDist.addEventListener('change', () => updateUI());
-    inputCustomDist.addEventListener('focus', () => inputCustomDist.select());
+    bindSelectOnFocus(inputCustomDist);
     inputCustomDist.addEventListener('keydown', e => {
         if (e.key === 'Enter') e.target.blur();
     });
@@ -399,19 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
     });
 
-    timeCustom.addEventListener('change', () => {
-        const customKm = getCustomDistanceKm();
-        const totalSecs = window.logic.parseTime(timeCustom.value);
-        if (customKm > 0 && totalSecs > 0) {
-            const requiredPaceSecs = window.logic.calculatePaceFromTimeAndDistance(totalSecs, customKm, currentUnit);
-            setPaceFromEdit(requiredPaceSecs);
-        }
-        updateUI();
-    });
-    timeCustom.addEventListener('focus', () => timeCustom.select());
-    timeCustom.addEventListener('keydown', e => {
-        if (e.key === 'Enter') e.target.blur();
-    });
+    bindStopwatchTimeInput(timeCustom, getCustomDistanceKm);
 
     // Tabs (click, keyboard arrows, and horizontal-dominant touch swipe)
     const tabBtns = document.querySelectorAll('.tab-nav-btn');
@@ -512,8 +578,8 @@ document.addEventListener('DOMContentLoaded', () => {
     inputDistMiles.addEventListener('input', () => updateDistancesFromMiles(true));
     inputDistKm.addEventListener('input', () => updateDistancesFromKm(true));
 
-    inputDistMiles.addEventListener('focus', () => inputDistMiles.select());
-    inputDistKm.addEventListener('focus', () => inputDistKm.select());
+    bindSelectOnFocus(inputDistMiles);
+    bindSelectOnFocus(inputDistKm);
     inputDistMiles.addEventListener('keydown', e => {
         if (e.key === 'Enter') e.target.blur();
     });
