@@ -1,101 +1,92 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#081226"/>
-      <stop offset="50%" stop-color="#13347A"/>
-      <stop offset="100%" stop-color="#2563EB"/>
+    <linearGradient id="chassis" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#243247"/>
+      <stop offset="100%" stop-color="#0B1120"/>
     </linearGradient>
-    <radialGradient id="glow" cx="62%" cy="43%" r="60%">
-      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.32"/>
-      <stop offset="100%" stop-color="#2563EB" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="rim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.30"/>
-      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.09"/>
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.03"/>
+    <linearGradient id="chassisRim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.04"/>
     </linearGradient>
-    <linearGradient id="track1" x1="78" y1="444" x2="444" y2="334" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.18"/>
-      <stop offset="42%" stop-color="#38BDF8" stop-opacity="0.96"/>
-      <stop offset="100%" stop-color="#34D399" stop-opacity="1"/>
+    <linearGradient id="blueKey" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="55%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
     </linearGradient>
-    <linearGradient id="track2" x1="126" y1="470" x2="440" y2="370" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.08"/>
-      <stop offset="55%" stop-color="#38BDF8" stop-opacity="0.62"/>
-      <stop offset="100%" stop-color="#34D399" stop-opacity="0.84"/>
+    <linearGradient id="slateKey" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#182234"/>
     </linearGradient>
-    <linearGradient id="backLimb" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#93C5FD"/>
-      <stop offset="100%" stop-color="#60A5FA"/>
+    <linearGradient id="orangeKey" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="55%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#EA580C"/>
     </linearGradient>
-    <linearGradient id="mathTile" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.21"/>
-      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.09"/>
+    <linearGradient id="keyBevelLight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.48"/>
+      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.04"/>
     </linearGradient>
-    <linearGradient id="eqTile" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38BDF8"/>
-      <stop offset="100%" stop-color="#34D399"/>
+    <linearGradient id="slateBevelLight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.02"/>
     </linearGradient>
-    <filter id="softShadow" x="-18%" y="-18%" width="136%" height="136%">
-      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#040A18" flood-opacity="0.38"/>
-    </filter>
-    <clipPath id="squircle">
+    <clipPath id="sq">
       <rect width="512" height="512" rx="114" ry="114"/>
     </clipPath>
   </defs>
 
-  <g clip-path="url(#squircle)">
-    <rect width="512" height="512" fill="url(#bg)"/>
-    <rect width="512" height="512" fill="url(#glow)"/>
-
-    <!-- Subtle precision grid -->
-    <g stroke="#FFFFFF" stroke-opacity="0.045" stroke-width="1.5">
-      <line x1="128" y1="0" x2="128" y2="512"/>
-      <line x1="256" y1="0" x2="256" y2="512"/>
-      <line x1="384" y1="0" x2="384" y2="512"/>
-      <line x1="0" y1="128" x2="512" y2="128"/>
-      <line x1="0" y1="256" x2="512" y2="256"/>
-      <line x1="0" y1="384" x2="512" y2="384"/>
-    </g>
+  <g clip-path="url(#sq)">
+    <rect width="512" height="512" fill="url(#chassis)"/>
 
     <g>
-      <!-- 2x2 Calculator / Math Motif -->
-      <g transform="translate(72 72)" filter="url(#softShadow)">
-        <rect width="148" height="148" rx="36" fill="url(#mathTile)" stroke="#FFFFFF" stroke-opacity="0.26" stroke-width="2.2"/>
-        <!-- Plus (+) -->
-        <g transform="translate(42 42)" stroke="#F0F9FF" stroke-width="10.5" stroke-linecap="round">
-          <line x1="-14.5" y1="0" x2="14.5" y2="0"/>
-          <line x1="0" y1="-14.5" x2="0" y2="14.5"/>
-        </g>
-        <!-- Minus (-) -->
-        <g transform="translate(106 42)" stroke="#BAE6FD" stroke-width="10.5" stroke-linecap="round">
-          <line x1="-14.5" y1="0" x2="14.5" y2="0"/>
-        </g>
-        <!-- Divide (÷) -->
-        <g transform="translate(42 106)">
-          <line x1="-14.5" y1="0" x2="14.5" y2="0" stroke="#BAE6FD" stroke-width="10" stroke-linecap="round"/>
-          <circle cx="0" cy="-15" r="5.5" fill="#BAE6FD"/>
-          <circle cx="0" cy="15" r="5.5" fill="#BAE6FD"/>
-        </g>
-        <!-- Equals (=) Accent Button -->
-        <g transform="translate(106 106)">
-          <rect x="-26" y="-26" width="52" height="52" rx="16" fill="url(#eqTile)"/>
-          <line x1="-12.5" y1="-6.8" x2="12.5" y2="-6.8" stroke="#07132A" stroke-width="8.6" stroke-linecap="round"/>
-          <line x1="-12.5" y1="6.8" x2="12.5" y2="6.8" stroke="#07132A" stroke-width="8.6" stroke-linecap="round"/>
-        </g>
+      <!-- Recessed 3D Keywells -->
+      <path d="M 114.0 38.5 L 217.0 38.5 A 28.0 28.0 0 0 1 245.0 66.5 L 245.0 223.5 A 28.0 28.0 0 0 1 217.0 251.5 L 60.0 251.5 A 28.0 28.0 0 0 1 32.0 223.5 L 32.0 120.5 A 82.0 82.0 0 0 1 114.0 38.5 Z" fill="#070D19"/>
+      <path d="M 295.0 38.5 L 398.0 38.5 A 82.0 82.0 0 0 1 480.0 120.5 L 480.0 223.5 A 28.0 28.0 0 0 1 452.0 251.5 L 295.0 251.5 A 28.0 28.0 0 0 1 267.0 223.5 L 267.0 66.5 A 28.0 28.0 0 0 1 295.0 38.5 Z" fill="#060B15"/>
+      <path d="M 60.0 273.5 L 217.0 273.5 A 28.0 28.0 0 0 1 245.0 301.5 L 245.0 458.5 A 28.0 28.0 0 0 1 217.0 486.5 L 114.0 486.5 A 82.0 82.0 0 0 1 32.0 404.5 L 32.0 301.5 A 28.0 28.0 0 0 1 60.0 273.5 Z" fill="#060B15"/>
+      <path d="M 295.0 273.5 L 452.0 273.5 A 28.0 28.0 0 0 1 480.0 301.5 L 480.0 404.5 A 82.0 82.0 0 0 1 398.0 486.5 L 295.0 486.5 A 28.0 28.0 0 0 1 267.0 458.5 L 267.0 301.5 A 28.0 28.0 0 0 1 295.0 273.5 Z" fill="#070D19"/>
+
+      <!-- Top-Left Key: Electric Royal Blue + Hermes Winged Running Shoe -->
+      <path d="M 114.0 32.0 L 217.0 32.0 A 28.0 28.0 0 0 1 245.0 60.0 L 245.0 217.0 A 28.0 28.0 0 0 1 217.0 245.0 L 60.0 245.0 A 28.0 28.0 0 0 1 32.0 217.0 L 32.0 114.0 A 82.0 82.0 0 0 1 114.0 32.0 Z" fill="url(#blueKey)" stroke="url(#keyBevelLight)" stroke-width="2.2"/>
+      <path transform="translate(141.5 144.5)" d="M -75 -65 C -42 -60, -18 -40, -6 -16 C -1 -19, 5 -24, 11 -24 C 17 -24, 21 -16, 23 -9 C 36 2, 50 14, 62 23 C 72 30, 82 35, 85 43 C 87 48, 81 53, 70 54 C 45 56, 15 48, -13 31 C -34 18, -51 6, -62 -5 C -66 -9, -65 -16, -59 -20 C -71 -22, -81 -28, -85 -36 C -71 -35, -57 -32, -45 -26 C -63 -34, -77 -43, -83 -53 C -67 -50, -51 -45, -36 -37 C -55 -47, -69 -57, -75 -65 Z M -66 4 C -52 17, -32 30, -10 42 C 18 57, 49 63, 77 60 C 83 59, 86 64, 81 68 C 68 75, 38 74, 3 60 C -25 48, -50 31, -69 14 C -73 10, -70 5, -66 4 Z M -55.10 -36.98 L -51.20 -34.80 L -47.42 -32.56 L -43.75 -30.26 L -40.19 -27.88 L -36.74 -25.44 L -33.41 -22.93 L -30.18 -20.36 L -27.07 -17.71 L -24.07 -15.00 L -21.17 -12.23 L -18.39 -9.38 L -15.72 -6.47 A 2.30 2.30 0 0 1 -12.28 -9.53 L -15.05 -12.55 L -17.94 -15.50 L -20.93 -18.37 L -24.04 -21.18 L -27.26 -23.91 L -30.59 -26.57 L -34.03 -29.16 L -37.59 -31.67 L -41.25 -34.12 L -45.02 -36.49 L -48.91 -38.79 L -52.90 -41.02 A 2.30 2.30 0 0 1 -55.10 -36.98 Z M -60.85 -21.86 L -56.79 -20.19 L -52.85 -18.48 L -49.05 -16.73 L -45.36 -14.94 L -41.81 -13.11 L -38.38 -11.24 L -35.07 -9.34 L -31.89 -7.39 L -28.84 -5.40 L -25.92 -3.38 L -23.12 -1.32 L -20.45 0.79 A 2.30 2.30 0 0 1 -17.55 -2.79 L -20.34 -4.98 L -23.25 -7.12 L -26.28 -9.22 L -29.44 -11.28 L -32.72 -13.29 L -36.12 -15.26 L -39.65 -17.18 L -43.30 -19.06 L -47.08 -20.89 L -50.98 -22.68 L -55.00 -24.43 L -59.15 -26.14 A 2.30 2.30 0 0 1 -60.85 -21.86 Z M 24.21 -7.59 L 16.21 1.41 A 2.40 2.40 0 0 1 19.79 4.59 L 27.79 -4.41 A 2.40 2.40 0 0 1 24.21 -7.59 Z M 37.21 3.41 L 29.21 12.41 A 2.40 2.40 0 0 1 32.79 15.59 L 40.79 6.59 A 2.40 2.40 0 0 1 37.21 3.41 Z M 50.21 13.41 L 42.21 22.41 A 2.40 2.40 0 0 1 45.79 25.59 L 53.79 16.59 A 2.40 2.40 0 0 1 50.21 13.41 Z" fill="#0A1E5E" fill-opacity="0.32" fill-rule="evenodd"/>
+      <path transform="translate(141.5 140.0)" d="M -75 -65 C -42 -60, -18 -40, -6 -16 C -1 -19, 5 -24, 11 -24 C 17 -24, 21 -16, 23 -9 C 36 2, 50 14, 62 23 C 72 30, 82 35, 85 43 C 87 48, 81 53, 70 54 C 45 56, 15 48, -13 31 C -34 18, -51 6, -62 -5 C -66 -9, -65 -16, -59 -20 C -71 -22, -81 -28, -85 -36 C -71 -35, -57 -32, -45 -26 C -63 -34, -77 -43, -83 -53 C -67 -50, -51 -45, -36 -37 C -55 -47, -69 -57, -75 -65 Z M -66 4 C -52 17, -32 30, -10 42 C 18 57, 49 63, 77 60 C 83 59, 86 64, 81 68 C 68 75, 38 74, 3 60 C -25 48, -50 31, -69 14 C -73 10, -70 5, -66 4 Z M -55.10 -36.98 L -51.20 -34.80 L -47.42 -32.56 L -43.75 -30.26 L -40.19 -27.88 L -36.74 -25.44 L -33.41 -22.93 L -30.18 -20.36 L -27.07 -17.71 L -24.07 -15.00 L -21.17 -12.23 L -18.39 -9.38 L -15.72 -6.47 A 2.30 2.30 0 0 1 -12.28 -9.53 L -15.05 -12.55 L -17.94 -15.50 L -20.93 -18.37 L -24.04 -21.18 L -27.26 -23.91 L -30.59 -26.57 L -34.03 -29.16 L -37.59 -31.67 L -41.25 -34.12 L -45.02 -36.49 L -48.91 -38.79 L -52.90 -41.02 A 2.30 2.30 0 0 1 -55.10 -36.98 Z M -60.85 -21.86 L -56.79 -20.19 L -52.85 -18.48 L -49.05 -16.73 L -45.36 -14.94 L -41.81 -13.11 L -38.38 -11.24 L -35.07 -9.34 L -31.89 -7.39 L -28.84 -5.40 L -25.92 -3.38 L -23.12 -1.32 L -20.45 0.79 A 2.30 2.30 0 0 1 -17.55 -2.79 L -20.34 -4.98 L -23.25 -7.12 L -26.28 -9.22 L -29.44 -11.28 L -32.72 -13.29 L -36.12 -15.26 L -39.65 -17.18 L -43.30 -19.06 L -47.08 -20.89 L -50.98 -22.68 L -55.00 -24.43 L -59.15 -26.14 A 2.30 2.30 0 0 1 -60.85 -21.86 Z M 24.21 -7.59 L 16.21 1.41 A 2.40 2.40 0 0 1 19.79 4.59 L 27.79 -4.41 A 2.40 2.40 0 0 1 24.21 -7.59 Z M 37.21 3.41 L 29.21 12.41 A 2.40 2.40 0 0 1 32.79 15.59 L 40.79 6.59 A 2.40 2.40 0 0 1 37.21 3.41 Z M 50.21 13.41 L 42.21 22.41 A 2.40 2.40 0 0 1 45.79 25.59 L 53.79 16.59 A 2.40 2.40 0 0 1 50.21 13.41 Z" fill="#FFFFFF" fill-rule="evenodd"/>
+
+      <!-- Top-Right Key: Tactile Slate + Plus (+) -->
+      <path d="M 295.0 32.0 L 398.0 32.0 A 82.0 82.0 0 0 1 480.0 114.0 L 480.0 217.0 A 28.0 28.0 0 0 1 452.0 245.0 L 295.0 245.0 A 28.0 28.0 0 0 1 267.0 217.0 L 267.0 60.0 A 28.0 28.0 0 0 1 295.0 32.0 Z" fill="url(#slateKey)" stroke="url(#slateBevelLight)" stroke-width="2.2"/>
+      <g transform="translate(373.5 143.0)" stroke="#020617" stroke-opacity="0.35" stroke-width="22" stroke-linecap="round">
+        <line x1="-40" y1="0" x2="40" y2="0"/>
+        <line x1="0" y1="-40" x2="0" y2="40"/>
+      </g>
+      <g transform="translate(373.5 138.5)" stroke="#F8FAFC" stroke-width="22" stroke-linecap="round">
+        <line x1="-40" y1="0" x2="40" y2="0"/>
+        <line x1="0" y1="-40" x2="0" y2="40"/>
       </g>
 
-      <!-- Rising Dual-Lane Speed / Conversion Track -->
-      <path d="M 78 444 Q 254 414 444 334" stroke="url(#track1)" stroke-width="14.5" stroke-linecap="round" fill="none"/>
-      <path d="M 128 468 Q 278 440 440 368" stroke="url(#track2)" stroke-width="8.5" stroke-linecap="round" fill="none"/>
+      <!-- Bottom-Left Key: Tactile Slate + Divide (÷) -->
+      <path d="M 60.0 267.0 L 217.0 267.0 A 28.0 28.0 0 0 1 245.0 295.0 L 245.0 452.0 A 28.0 28.0 0 0 1 217.0 480.0 L 114.0 480.0 A 82.0 82.0 0 0 1 32.0 398.0 L 32.0 295.0 A 28.0 28.0 0 0 1 60.0 267.0 Z" fill="url(#slateKey)" stroke="url(#slateBevelLight)" stroke-width="2.2"/>
+      <g transform="translate(138.5 378.0)" opacity="0.35">
+        <line x1="-40" y1="0" x2="40" y2="0" stroke="#020617" stroke-width="22" stroke-linecap="round"/>
+        <circle cx="0" cy="-38" r="13" fill="#020617"/>
+        <circle cx="0" cy="38" r="13" fill="#020617"/>
+      </g>
+      <g transform="translate(138.5 373.5)">
+        <line x1="-40" y1="0" x2="40" y2="0" stroke="#F8FAFC" stroke-width="22" stroke-linecap="round"/>
+        <circle cx="0" cy="-38" r="13" fill="#F8FAFC"/>
+        <circle cx="0" cy="38" r="13" fill="#F8FAFC"/>
+      </g>
 
-      <!-- Sculpted Sprinter -->
-      <g filter="url(#softShadow)">
-        <path d="M 306.6 175.3 L 249.5 196.5 A 11.4 11.4 0 0 0 256.4 218.3 L 315.3 202.9 A 14.5 14.5 0 1 0 306.6 175.3 Z M 244.9 199.7 L 211.9 237.9 A 9.2 9.2 0 0 0 225.2 250.5 L 261.5 215.4 A 11.4 11.4 0 1 0 244.9 199.7 Z M 254.9 262.8 L 207.4 307.3 A 13.8 13.8 0 0 0 224.5 328.8 L 278.4 292.2 A 18.9 18.9 0 1 0 254.9 262.8 Z M 206.6 308.1 L 150.5 370.0 A 9.7 9.7 0 0 0 164.1 383.7 L 226.1 327.6 A 13.8 13.8 0 1 0 206.6 308.1 Z" fill="url(#backLimb)"/>
-        <path d="M 302.2 171.1 L 254.2 265.5 A 19.9 19.9 0 0 0 288.6 285.4 L 346.3 196.6 A 25.5 25.5 0 1 0 302.2 171.1 Z M 280.4 293.4 L 379.2 270.1 A 14.3 14.3 0 0 0 374.0 242.0 L 273.4 255.3 A 19.4 19.4 0 1 0 280.4 293.4 Z M 362.1 252.6 L 339.5 341.4 A 10.2 10.2 0 0 0 359.0 347.3 L 389.4 260.9 A 14.3 14.3 0 1 0 362.1 252.6 Z M 320.5 196.2 L 358.7 224.8 A 11.7 11.7 0 0 0 373.7 206.8 L 338.7 174.3 A 14.3 14.3 0 1 0 320.5 196.2 Z M 374.1 223.6 L 419.6 177.3 A 9.7 9.7 0 0 0 406.2 163.3 L 357.9 206.6 A 11.7 11.7 0 1 0 374.1 223.6 Z" fill="#FFFFFF"/>
-        <circle cx="358.6" cy="119.5" r="28.6" fill="#FFFFFF"/>
+      <!-- Bottom-Right Key: Athletic Track Orange + Equals (=) -->
+      <path d="M 295.0 267.0 L 452.0 267.0 A 28.0 28.0 0 0 1 480.0 295.0 L 480.0 398.0 A 82.0 82.0 0 0 1 398.0 480.0 L 295.0 480.0 A 28.0 28.0 0 0 1 267.0 452.0 L 267.0 295.0 A 28.0 28.0 0 0 1 295.0 267.0 Z" fill="url(#orangeKey)" stroke="url(#keyBevelLight)" stroke-width="2.2"/>
+      <g transform="translate(373.5 378.0)" stroke="#7C2D12" stroke-opacity="0.35" stroke-width="22" stroke-linecap="round">
+        <line x1="-40" y1="-19" x2="40" y2="-19"/>
+        <line x1="-40" y1="19" x2="40" y2="19"/>
+      </g>
+      <g transform="translate(373.5 373.5)" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round">
+        <line x1="-40" y1="-19" x2="40" y2="-19"/>
+        <line x1="-40" y1="19" x2="40" y2="19"/>
       </g>
     </g>
   </g>
-  <rect x="0.75" y="0.75" width="510.5" height="510.5" rx="113.25" ry="113.25" fill="none" stroke="url(#rim)" stroke-width="1.5"/>
+  <rect x="1" y="1" width="510" height="510" rx="113" ry="113" fill="none" stroke="url(#chassisRim)" stroke-width="2"/>
 </svg>
