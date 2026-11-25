@@ -208,12 +208,15 @@ document.addEventListener('DOMContentLoaded', () => {
     btnKm.addEventListener('click', () => switchUnit('km'));
 
     // Press-and-hold auto-repeat on +/- adjustment buttons
+    // Single taps fire via native 'click' (preventing touch pointerleave/click double-triggers);
+    // holding >= 350ms starts repeating and suppresses the trailing click on release.
     const activeStopHandlers = [];
     adjustBtns.forEach(btn => {
         const adj = parseInt(btn.dataset.adj, 10);
         let holdTimeout = null;
         let repeatInterval = null;
-        let handledByPointer = false;
+        let suppressNextClick = false;
+        let suppressResetTimer = null;
 
         function step() {
             setPaceFromEdit(currentPaceSeconds + adj);
@@ -231,46 +234,59 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        function endPointer() {
+            const wasRepeating = suppressNextClick;
+            stopHold();
+            if (wasRepeating) {
+                if (suppressResetTimer) clearTimeout(suppressResetTimer);
+                suppressResetTimer = setTimeout(() => {
+                    suppressNextClick = false;
+                    suppressResetTimer = null;
+                }, 600);
+            }
+        }
+
         activeStopHandlers.push(() => {
             stopHold();
-            handledByPointer = false;
+            suppressNextClick = false;
+            if (suppressResetTimer) {
+                clearTimeout(suppressResetTimer);
+                suppressResetTimer = null;
+            }
         });
 
         btn.addEventListener('pointerdown', e => {
             if (e.button !== undefined && e.button !== 0) return;
             stopHold();
-            handledByPointer = true;
-            step();
+            if (suppressResetTimer) {
+                clearTimeout(suppressResetTimer);
+                suppressResetTimer = null;
+            }
+            suppressNextClick = false;
+
             holdTimeout = setTimeout(() => {
+                holdTimeout = null;
+                suppressNextClick = true;
+                step();
                 repeatInterval = setInterval(step, 85);
-            }, 400);
+            }, 350);
         });
 
-        btn.addEventListener('pointerup', () => {
-            stopHold();
-            setTimeout(() => {
-                handledByPointer = false;
-            }, 50);
-        });
-
-        btn.addEventListener('pointerleave', () => {
-            stopHold();
-            handledByPointer = false;
-        });
-
-        btn.addEventListener('pointercancel', () => {
-            stopHold();
-            handledByPointer = false;
-        });
-
+        btn.addEventListener('pointerup', endPointer);
+        btn.addEventListener('pointerleave', endPointer);
+        btn.addEventListener('pointercancel', endPointer);
         btn.addEventListener('contextmenu', e => e.preventDefault());
 
-        btn.addEventListener('click', () => {
-            if (handledByPointer) {
-                handledByPointer = false;
+        btn.addEventListener('click', e => {
+            if (suppressNextClick) {
+                suppressNextClick = false;
+                if (suppressResetTimer) {
+                    clearTimeout(suppressResetTimer);
+                    suppressResetTimer = null;
+                }
+                e.preventDefault();
                 return;
             }
-            // Keyboard Enter/Space or assistive technology activation
             step();
         });
     });
