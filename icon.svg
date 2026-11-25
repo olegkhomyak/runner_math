@@ -1,56 +1,101 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#04122C" /> <stop offset="45%" stop-color="#0B3C88" /> <stop offset="100%" stop-color="#0066FF" /> </linearGradient>
-
-    <linearGradient id="trackGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0" />
-      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.35" />
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#081226"/>
+      <stop offset="50%" stop-color="#13347A"/>
+      <stop offset="100%" stop-color="#2563EB"/>
     </linearGradient>
-
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
-      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
+    <radialGradient id="glow" cx="62%" cy="43%" r="60%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#2563EB" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.30"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.03"/>
+    </linearGradient>
+    <linearGradient id="track1" x1="78" y1="444" x2="444" y2="334" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.18"/>
+      <stop offset="42%" stop-color="#38BDF8" stop-opacity="0.96"/>
+      <stop offset="100%" stop-color="#34D399" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="track2" x1="126" y1="470" x2="440" y2="370" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.08"/>
+      <stop offset="55%" stop-color="#38BDF8" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="#34D399" stop-opacity="0.84"/>
+    </linearGradient>
+    <linearGradient id="backLimb" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#93C5FD"/>
+      <stop offset="100%" stop-color="#60A5FA"/>
+    </linearGradient>
+    <linearGradient id="mathTile" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.21"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.09"/>
+    </linearGradient>
+    <linearGradient id="eqTile" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+    <filter id="softShadow" x="-18%" y="-18%" width="136%" height="136%">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#040A18" flood-opacity="0.38"/>
     </filter>
+    <clipPath id="squircle">
+      <rect width="512" height="512" rx="114" ry="114"/>
+    </clipPath>
   </defs>
 
-  <rect x="44" y="44" width="424" height="424" rx="95" ry="95" fill="url(#bgGrad)" filter="url(#shadow)" />
+  <g clip-path="url(#squircle)">
+    <rect width="512" height="512" fill="url(#bg)"/>
+    <rect width="512" height="512" fill="url(#glow)"/>
 
-  <path d="M 60 360 Q 256 420 452 280" stroke="url(#trackGrad)" stroke-width="6" stroke-linecap="round" fill="none" />
+    <!-- Subtle precision grid -->
+    <g stroke="#FFFFFF" stroke-opacity="0.045" stroke-width="1.5">
+      <line x1="128" y1="0" x2="128" y2="512"/>
+      <line x1="256" y1="0" x2="256" y2="512"/>
+      <line x1="384" y1="0" x2="384" y2="512"/>
+      <line x1="0" y1="128" x2="512" y2="128"/>
+      <line x1="0" y1="256" x2="512" y2="256"/>
+      <line x1="0" y1="384" x2="512" y2="384"/>
+    </g>
 
-  <g transform="translate(120, 130) rotate(15)" opacity="0.12" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round">
-    <line x1="-16" y1="0" x2="16" y2="0"/>
-    <line x1="0" y1="-16" x2="0" y2="16"/>
+    <g>
+      <!-- 2x2 Calculator / Math Motif -->
+      <g transform="translate(72 72)" filter="url(#softShadow)">
+        <rect width="148" height="148" rx="36" fill="url(#mathTile)" stroke="#FFFFFF" stroke-opacity="0.26" stroke-width="2.2"/>
+        <!-- Plus (+) -->
+        <g transform="translate(42 42)" stroke="#F0F9FF" stroke-width="10.5" stroke-linecap="round">
+          <line x1="-14.5" y1="0" x2="14.5" y2="0"/>
+          <line x1="0" y1="-14.5" x2="0" y2="14.5"/>
+        </g>
+        <!-- Minus (-) -->
+        <g transform="translate(106 42)" stroke="#BAE6FD" stroke-width="10.5" stroke-linecap="round">
+          <line x1="-14.5" y1="0" x2="14.5" y2="0"/>
+        </g>
+        <!-- Divide (÷) -->
+        <g transform="translate(42 106)">
+          <line x1="-14.5" y1="0" x2="14.5" y2="0" stroke="#BAE6FD" stroke-width="10" stroke-linecap="round"/>
+          <circle cx="0" cy="-15" r="5.5" fill="#BAE6FD"/>
+          <circle cx="0" cy="15" r="5.5" fill="#BAE6FD"/>
+        </g>
+        <!-- Equals (=) Accent Button -->
+        <g transform="translate(106 106)">
+          <rect x="-26" y="-26" width="52" height="52" rx="16" fill="url(#eqTile)"/>
+          <line x1="-12.5" y1="-6.8" x2="12.5" y2="-6.8" stroke="#07132A" stroke-width="8.6" stroke-linecap="round"/>
+          <line x1="-12.5" y1="6.8" x2="12.5" y2="6.8" stroke="#07132A" stroke-width="8.6" stroke-linecap="round"/>
+        </g>
+      </g>
+
+      <!-- Rising Dual-Lane Speed / Conversion Track -->
+      <path d="M 78 444 Q 254 414 444 334" stroke="url(#track1)" stroke-width="14.5" stroke-linecap="round" fill="none"/>
+      <path d="M 128 468 Q 278 440 440 368" stroke="url(#track2)" stroke-width="8.5" stroke-linecap="round" fill="none"/>
+
+      <!-- Sculpted Sprinter -->
+      <g filter="url(#softShadow)">
+        <path d="M 306.6 175.3 L 249.5 196.5 A 11.4 11.4 0 0 0 256.4 218.3 L 315.3 202.9 A 14.5 14.5 0 1 0 306.6 175.3 Z M 244.9 199.7 L 211.9 237.9 A 9.2 9.2 0 0 0 225.2 250.5 L 261.5 215.4 A 11.4 11.4 0 1 0 244.9 199.7 Z M 254.9 262.8 L 207.4 307.3 A 13.8 13.8 0 0 0 224.5 328.8 L 278.4 292.2 A 18.9 18.9 0 1 0 254.9 262.8 Z M 206.6 308.1 L 150.5 370.0 A 9.7 9.7 0 0 0 164.1 383.7 L 226.1 327.6 A 13.8 13.8 0 1 0 206.6 308.1 Z" fill="url(#backLimb)"/>
+        <path d="M 302.2 171.1 L 254.2 265.5 A 19.9 19.9 0 0 0 288.6 285.4 L 346.3 196.6 A 25.5 25.5 0 1 0 302.2 171.1 Z M 280.4 293.4 L 379.2 270.1 A 14.3 14.3 0 0 0 374.0 242.0 L 273.4 255.3 A 19.4 19.4 0 1 0 280.4 293.4 Z M 362.1 252.6 L 339.5 341.4 A 10.2 10.2 0 0 0 359.0 347.3 L 389.4 260.9 A 14.3 14.3 0 1 0 362.1 252.6 Z M 320.5 196.2 L 358.7 224.8 A 11.7 11.7 0 0 0 373.7 206.8 L 338.7 174.3 A 14.3 14.3 0 1 0 320.5 196.2 Z M 374.1 223.6 L 419.6 177.3 A 9.7 9.7 0 0 0 406.2 163.3 L 357.9 206.6 A 11.7 11.7 0 1 0 374.1 223.6 Z" fill="#FFFFFF"/>
+        <circle cx="358.6" cy="119.5" r="28.6" fill="#FFFFFF"/>
+      </g>
+    </g>
   </g>
-
-  <g transform="translate(380, 140) rotate(-10)" opacity="0.12">
-    <line x1="-18" y1="0" x2="18" y2="0" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
-    <circle cx="0" cy="-18" r="6" fill="#FFFFFF"/>
-    <circle cx="0" cy="18" r="6" fill="#FFFFFF"/>
-  </g>
-
-  <g transform="translate(390, 360) rotate(-20)" opacity="0.12" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round">
-    <line x1="-18" y1="-8" x2="18" y2="-8"/>
-    <line x1="-18" y1="8" x2="18" y2="8"/>
-  </g>
-
-  <g transform="translate(140, 360) rotate(45)" opacity="0.12" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round">
-    <line x1="-14" y1="0" x2="14" y2="0"/>
-    <line x1="0" y1="-14" x2="0" y2="14"/>
-  </g>
-
-  <g transform="translate(8, 12) scale(1.05)">
-    
-    <path d="M 265 190 L 225 225 L 245 170" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
-
-    <path d="M 250 270 L 195 305 L 145 345" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
-
-    <path d="M 265 190 Q 275 230 250 270" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" fill="none"/>
-
-    <path d="M 250 270 L 315 255 L 325 330" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-
-    <path d="M 265 190 L 305 225 L 335 185" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-
-    <circle cx="285" cy="130" r="26" fill="#FFFFFF"/>
-  </g>
+  <rect x="0.75" y="0.75" width="510.5" height="510.5" rx="113.25" ry="113.25" fill="none" stroke="url(#rim)" stroke-width="1.5"/>
 </svg>
