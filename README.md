@@ -1,15 +1,16 @@
 # Runner Math
 
-A simple, fast, offline-capable Progressive Web App (PWA) for runners to convert paces and calculate race times.
+A simple, fast, offline-capable Progressive Web App (PWA) for runners to convert paces, treadmill speeds, distances, and race times.
 
 ## Features
-- **Pace Converter**: Easily switch between min/mi and min/km with a seamless UI.
-- **Race Calculator**: Instantly see estimated finish times for 5K, 10K, Half Marathon, and Marathon based on your current pace.
-- **Reverse Pace Calculator**: Have a target race time in mind? Enter it directly into the race time fields to calculate the exact pace required.
-- **Distance Converter**: Quick conversions between miles and kilometers for common race distances.
-- **Mobile-Friendly Navigation**: Enjoy native-like swipe gestures to switch between the Pace and Distance tabs on touch devices.
-- **Offline Ready**: Fully functional without an internet connection. Installable on iOS and Android home screens.
-- **Dark Mode**: Automatically adapts to your system's light or dark theme preferences.
+- **Pace Converter**: Switch seamlessly between `min/mi` and `min/km` with press-and-hold quick adjustment controls.
+- **Treadmill Speed Converter**: View and edit `mph` and `km/h` speeds right alongside your running pace.
+- **Race & Custom Distance Calculator**: Instantly see estimated finish times for 5K, 10K, Half Marathon, Marathon, or any custom distance.
+- **Reverse Pace Calculator**: Enter a target race time (e.g., `20:00` or `2000` on mobile keypads) to calculate the exact pace required.
+- **Distance Converter**: Convert miles and kilometers with exact presets for track, road, and ultra distances—plus estimated finish times at your current pace.
+- **Mobile-Friendly Navigation**: Horizontal swipe gestures and mobile-optimized numeric/decimal keypads.
+- **Offline Ready**: Installable on iOS and Android home screens and fully functional without an internet connection.
+- **Dark Mode**: Adapts automatically to system preferences with manual toggle support.
 
 ## Tech Stack
 - Vanilla HTML, CSS, and JavaScript

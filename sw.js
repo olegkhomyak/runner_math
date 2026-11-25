@@ -1,4 +1,5 @@
-const CACHE_NAME = 'runner-math-v0.1.1';
+// Keep version synced with .version-badge in index.html
+const CACHE_NAME = 'runner-math-v1.2';
 const urlsToCache = [
   './',
   './index.html',
@@ -6,27 +7,26 @@ const urlsToCache = [
   './logic.js',
   './app.js',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-512.png',
+  './icons/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(urlsToCache))
   );
 });
 
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
+    caches.match(event.request, { ignoreSearch: true })
+      .then(response => response || fetch(event.request))
   );
 });
 
@@ -34,15 +34,15 @@ self.addEventListener('activate', event => {
   const cacheAllowlist = [CACHE_NAME];
 
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
+    caches.keys()
+      .then(cacheNames => Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheAllowlist.indexOf(cacheName) === -1) {
+          if (!cacheAllowlist.includes(cacheName)) {
             return caches.delete(cacheName);
           }
         })
-      );
-    })
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
