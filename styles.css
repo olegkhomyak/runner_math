@@ -114,7 +114,7 @@ body {
 }
 
 button:focus-visible,
-[role="button"]:focus-visible {
+summary:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
 }
@@ -245,9 +245,6 @@ h1 {
     font-weight: 800;
     letter-spacing: -0.025em;
     color: var(--text-h1);
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
 }
 
 .version-badge {
@@ -256,9 +253,9 @@ h1 {
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.02em;
     color: var(--text-light);
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    padding: 0.14rem 0.42rem;
+    background: var(--well-bg);
+    border: 1px solid var(--well-border);
+    padding: 0.12rem 0.42rem;
     border-radius: 999px;
 }
 
@@ -526,13 +523,14 @@ h2 {
     margin: 0;
     width: 2.5ch;
     text-align: center;
-    -moz-appearance: textfield;
     transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.time-input:hover {
-    background: var(--surface-hover);
-    border-color: var(--primary-border);
+@media (hover: hover) and (pointer: fine) {
+    .time-input:hover {
+        background: var(--surface-hover);
+        border-color: var(--primary-border);
+    }
 }
 
 .time-input:focus {
@@ -661,7 +659,6 @@ h2 {
     width: 100%;
     min-width: 0;
     text-align: left;
-    -moz-appearance: textfield;
 }
 
 .speed-input:focus {
@@ -785,6 +782,10 @@ h2 {
     transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.race-grid .race-item:not(.custom-race-item) {
+    cursor: pointer;
+}
+
 @media (hover: hover) and (pointer: fine) {
     .race-grid .race-item:not(.custom-race-item):hover {
         border-color: var(--primary-border);
@@ -902,7 +903,6 @@ h2 {
     min-height: 40px;
     padding: 0.3rem 0.45rem;
     text-align: right;
-    -moz-appearance: textfield;
     transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -1073,7 +1073,6 @@ h2 {
     background: transparent;
     padding: 0.1rem 0;
     margin: 0;
-    -moz-appearance: textfield;
     transition: font-size 0.12s ease;
 }
 
@@ -1170,6 +1169,14 @@ h2 {
     grid-template-columns: 1.6fr 1fr 1fr;
     align-items: center;
     gap: 0.5rem;
+    width: 100%;
+    margin: 0;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    color: inherit;
+    appearance: none;
+    -webkit-appearance: none;
     text-align: right;
     padding: 0.65rem 0.65rem;
     border-radius: 0.65rem;
@@ -1221,12 +1228,12 @@ h2 {
     transform: scale(0.99);
 }
 
-.less-common {
-    display: none !important;
+.distance-row.less-common {
+    display: none;
 }
 
-.show-all .less-common {
-    display: grid !important;
+.distance-table.show-all .distance-row.less-common {
+    display: grid;
 }
 
 .expand-distances-btn {
@@ -1270,6 +1277,118 @@ h2 {
         border-color: var(--primary-border);
         color: var(--text-main);
     }
+}
+
+/* Collapsible About & Reference Footer */
+.app-footer {
+    margin-top: 0.1rem;
+}
+
+.about-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+
+.about-summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-light);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.about-summary::-webkit-details-marker {
+    display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .about-summary:hover {
+        background: var(--well-bg);
+        color: var(--text-main);
+    }
+}
+
+.about-card[open] .about-summary {
+    color: var(--text-main);
+    border-bottom: 1px solid var(--well-border);
+}
+
+.about-summary-end {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.about-chevron {
+    width: 0.42rem;
+    height: 0.42rem;
+    border-right: 1.8px solid currentColor;
+    border-bottom: 1.8px solid currentColor;
+    transform: translateY(-1px) rotate(45deg);
+    transition: transform 0.2s ease;
+}
+
+.about-card[open] .about-chevron {
+    transform: translateY(2px) rotate(-135deg);
+}
+
+.about-content {
+    padding: 0.85rem 1rem 0.95rem;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.about-content p {
+    margin: 0;
+}
+
+.about-content h3 {
+    margin: 0.1rem 0 0;
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-light);
+}
+
+.about-list {
+    margin: 0;
+    padding-left: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.about-content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    background: var(--well-bg);
+    border: 1px solid var(--well-border);
+    border-radius: 0.32rem;
+    padding: 0.06rem 0.3rem;
+    color: var(--text-main);
+}
+
+.about-note {
+    font-size: 0.78rem;
+    color: var(--text-light);
 }
 
 /* Utilities */

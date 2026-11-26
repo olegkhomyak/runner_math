@@ -1,7 +1,15 @@
 // App UI & interaction logic
 document.addEventListener('DOMContentLoaded', () => {
+    const logic = window.logic;
     const MIN_PACE_SECS = 1;
     const MAX_PACE_SECS = 3599; // 59:59
+    const DEFAULT_PACE_SECS = 8 * 60;
+    const DEFAULT_CUSTOM_DIST = '10';
+    const DEFAULT_CONVERTER_KM = '5';
+    const THEME_COLORS = {
+        dark: '#0b1120',
+        light: '#eef2f7'
+    };
 
     // Safe localStorage wrapper for private-browsing / restricted storage contexts
     const storage = {
@@ -20,19 +28,38 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function clampPace(pace) {
-        if (!isFinite(pace) || isNaN(pace)) return 8 * 60;
+        if (!Number.isFinite(pace)) return DEFAULT_PACE_SECS;
         return Math.max(MIN_PACE_SECS, Math.min(MAX_PACE_SECS, Math.round(pace)));
+    }
+
+    // Ensure WebKit / mobile Safari commits any focused <input> before handling button taps
+    function commitActiveInput() {
+        const active = document.activeElement;
+        if (active && active.tagName === 'INPUT') {
+            active.blur();
+        }
+    }
+
+    function bindBlurOnEnter(el) {
+        el.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                el.blur();
+            }
+        });
     }
 
     // State
     let currentUnit = 'mi'; // 'mi' or 'km'
-    let currentPaceSeconds = 8 * 60;
+    let currentPaceSeconds = DEFAULT_PACE_SECS;
     // Anchor both units on edits so switching mi <-> km <-> mi repeatedly never drifts
     let anchorPace = {
         mi: currentPaceSeconds,
-        km: clampPace(window.logic.convertPace(currentPaceSeconds, 'mi'))
+        km: clampPace(logic.convertPace(currentPaceSeconds, 'mi'))
     };
     let customDistUnit = 'mi';
+    let lastValidCustomDist = DEFAULT_CUSTOM_DIST;
+    let converterDistKm = Number(DEFAULT_CONVERTER_KM);
 
     function setPaceFromEdit(newPaceSecs, unit = currentUnit) {
         currentUnit = unit === 'km' ? 'km' : 'mi';
@@ -40,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const otherUnit = currentUnit === 'mi' ? 'km' : 'mi';
         anchorPace = {
             [currentUnit]: currentPaceSeconds,
-            [otherUnit]: clampPace(window.logic.convertPace(currentPaceSeconds, currentUnit))
+            [otherUnit]: clampPace(logic.convertPace(currentPaceSeconds, currentUnit))
         };
     }
 
@@ -58,10 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputMph = document.getElementById('input-mph');
     const inputKmh = document.getElementById('input-kmh');
 
-    const time5k = document.getElementById('input-time-5k');
-    const time10k = document.getElementById('input-time-10k');
-    const timeHalf = document.getElementById('input-time-half');
-    const timeFull = document.getElementById('input-time-full');
     const raceTimeInputs = document.querySelectorAll('.race-time-input[data-dist]');
 
     const inputCustomDist = document.getElementById('input-custom-dist');
@@ -79,24 +102,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const distanceGrid = document.getElementById('distance-grid');
     const distanceRows = document.querySelectorAll('.distance-row');
 
-    function parseDecimal(raw) {
-        if (typeof raw !== 'string') return NaN;
-        const normalized = raw.trim().replace(',', '.');
-        return normalized === '' ? NaN : parseFloat(normalized);
-    }
-
     function getCustomDistanceKm() {
-        const val = parseDecimal(inputCustomDist.value);
+        const val = logic.parseDecimal(inputCustomDist.value);
         if (isNaN(val) || val <= 0) return 0;
-        return customDistUnit === 'mi' ? window.logic.convertMilesToKm(val) : val;
+        return customDistUnit === 'mi' ? logic.convertMilesToKm(val) : val;
     }
 
     function updateDistPaceSummary() {
-        const km = parseDecimal(inputDistKm.value);
-        if (!isNaN(km) && km > 0) {
-            distSummaryPace.textContent = `${window.logic.formatTime(currentPaceSeconds)}/${currentUnit}`;
-            const finishSecs = window.logic.calculateFinishTime(currentPaceSeconds, currentUnit, km);
-            distSummaryTime.textContent = window.logic.formatTime(finishSecs);
+        if (converterDistKm > 0) {
+            distSummaryPace.textContent = `${logic.formatTime(currentPaceSeconds)}/${currentUnit}`;
+            const finishSecs = logic.calculateFinishTime(currentPaceSeconds, currentUnit, converterDistKm);
+            distSummaryTime.textContent = logic.formatTime(finishSecs);
             distPaceSummary.classList.remove('hidden');
         } else {
             distPaceSummary.classList.add('hidden');
@@ -111,15 +127,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isNaN(savedPace)) {
             setPaceFromEdit(savedPace, validUnit);
         } else {
-            setPaceFromEdit(8 * 60, validUnit);
+            setPaceFromEdit(DEFAULT_PACE_SECS, validUnit);
         }
 
         const savedCustomDist = storage.get('customDistValue');
-        if (savedCustomDist !== null && savedCustomDist.trim() !== '' && parseDecimal(savedCustomDist) > 0) {
-            inputCustomDist.value = savedCustomDist;
+        if (savedCustomDist !== null && logic.parseDecimal(savedCustomDist) > 0) {
+            lastValidCustomDist = savedCustomDist.trim();
         } else {
-            inputCustomDist.value = '10';
+            lastValidCustomDist = DEFAULT_CUSTOM_DIST;
         }
+        inputCustomDist.value = lastValidCustomDist;
+
         const savedCustomUnit = storage.get('customDistUnit');
         if (savedCustomUnit === 'mi' || savedCustomUnit === 'km') {
             customDistUnit = savedCustomUnit;
@@ -129,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function saveState() {
         storage.set('currentPaceSeconds', currentPaceSeconds);
         storage.set('currentUnit', currentUnit);
-        storage.set('customDistValue', inputCustomDist.value);
+        storage.set('customDistValue', lastValidCustomDist);
         storage.set('customDistUnit', customDistUnit);
     }
 
@@ -157,31 +175,25 @@ document.addEventListener('DOMContentLoaded', () => {
         displayUnit.textContent = `/${currentUnit}`;
 
         // Converted pace display
-        const converted = window.logic.convertPace(currentPaceSeconds, currentUnit);
-        convertedTime.textContent = window.logic.formatTime(converted);
+        const converted = logic.convertPace(currentPaceSeconds, currentUnit);
+        convertedTime.textContent = logic.formatTime(converted);
         convertedUnit.textContent = `/${isMi ? 'km' : 'mi'}`;
 
         // Treadmill speeds
         if (activeEl !== inputMph) {
-            inputMph.value = window.logic.paceToSpeed(currentPaceSeconds, currentUnit, 'mph').toFixed(1);
+            inputMph.value = logic.paceToSpeed(currentPaceSeconds, currentUnit, 'mph').toFixed(1);
         }
         if (activeEl !== inputKmh) {
-            inputKmh.value = window.logic.paceToSpeed(currentPaceSeconds, currentUnit, 'kmh').toFixed(1);
+            inputKmh.value = logic.paceToSpeed(currentPaceSeconds, currentUnit, 'kmh').toFixed(1);
         }
 
         // Standard race times
-        if (activeEl !== time5k) {
-            time5k.value = window.logic.formatTime(window.logic.calculateFinishTime(currentPaceSeconds, currentUnit, window.logic.raceDistancesKm['5k']));
-        }
-        if (activeEl !== time10k) {
-            time10k.value = window.logic.formatTime(window.logic.calculateFinishTime(currentPaceSeconds, currentUnit, window.logic.raceDistancesKm['10k']));
-        }
-        if (activeEl !== timeHalf) {
-            timeHalf.value = window.logic.formatTime(window.logic.calculateFinishTime(currentPaceSeconds, currentUnit, window.logic.raceDistancesKm['half']));
-        }
-        if (activeEl !== timeFull) {
-            timeFull.value = window.logic.formatTime(window.logic.calculateFinishTime(currentPaceSeconds, currentUnit, window.logic.raceDistancesKm['full']));
-        }
+        raceTimeInputs.forEach(input => {
+            if (activeEl !== input) {
+                const distKm = logic.raceDistancesKm[input.dataset.dist];
+                input.value = logic.formatTime(logic.calculateFinishTime(currentPaceSeconds, currentUnit, distKm));
+            }
+        });
 
         // Custom distance row
         btnCustomUnit.textContent = customDistUnit;
@@ -192,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const customKm = getCustomDistanceKm();
         if (activeEl !== timeCustom) {
             timeCustom.value = customKm > 0
-                ? window.logic.formatTime(window.logic.calculateFinishTime(currentPaceSeconds, currentUnit, customKm))
+                ? logic.formatTime(logic.calculateFinishTime(currentPaceSeconds, currentUnit, customKm))
                 : '';
         }
 
@@ -202,12 +214,13 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
     }
 
-    // Segmented unit selector (no-op if clicking the already-selected unit)
+    // Segmented unit selector (commits active input first; no-op if already on targetUnit)
     function switchUnit(targetUnit) {
+        commitActiveInput();
         if (currentUnit === targetUnit) return;
         currentUnit = targetUnit;
         currentPaceSeconds = anchorPace[targetUnit] || clampPace(
-            window.logic.convertPace(currentPaceSeconds, targetUnit === 'mi' ? 'km' : 'mi')
+            logic.convertPace(currentPaceSeconds, targetUnit === 'mi' ? 'km' : 'mi')
         );
         updateUI();
     }
@@ -265,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         btn.addEventListener('pointerdown', e => {
             if (e.button !== undefined && e.button !== 0) return;
+            commitActiveInput();
             stopHold();
             if (suppressResetTimer) {
                 clearTimeout(suppressResetTimer);
@@ -286,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('contextmenu', e => e.preventDefault());
 
         btn.addEventListener('click', e => {
+            commitActiveInput();
             if (suppressNextClick) {
                 suppressNextClick = false;
                 if (suppressResetTimer) {
@@ -299,8 +314,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    window.addEventListener('blur', () => {
+    function stopAllActiveHolds() {
         activeStopHandlers.forEach(stop => stop());
+    }
+
+    window.addEventListener('blur', stopAllActiveHolds);
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopAllActiveHolds();
     });
 
     // Reliable select-on-focus helper that prevents mobile mouseup caret collapse
@@ -352,14 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handlePaceCommit() {
         setPaceFromEdit(parseManualPaceInputs());
-        // Defer slightly so auto-advancing minutes -> seconds keeps seconds empty on focus
-        setTimeout(() => {
-            if (document.activeElement !== inputMinutes && document.activeElement !== inputSeconds) {
-                updateUI();
-            } else {
-                updateUI({ preserveActiveInput: true });
-            }
-        }, 0);
+        updateUI();
     }
 
     [inputMinutes, inputSeconds].forEach(el => {
@@ -371,25 +384,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         el.addEventListener('input', handlePaceLiveInput);
         el.addEventListener('blur', handlePaceCommit);
+        bindBlurOnEnter(el);
     });
 
     inputMinutes.addEventListener('keydown', e => {
         if (e.key === ':') {
             e.preventDefault();
             inputSeconds.focus();
-        } else if (e.key === 'Enter') {
-            e.target.blur();
         }
-    });
-    inputSeconds.addEventListener('keydown', e => {
-        if (e.key === 'Enter') e.target.blur();
     });
 
     // Treadmill speed inputs (mph & km/h)
     function handleSpeedInput(inputEl, speedUnit, commit) {
-        const speed = parseDecimal(inputEl.value);
+        const speed = logic.parseDecimal(inputEl.value);
         if (!isNaN(speed) && speed > 0) {
-            const paceSecs = window.logic.speedToPace(speed, speedUnit, currentUnit);
+            const paceSecs = logic.speedToPace(speed, speedUnit, currentUnit);
             setPaceFromEdit(paceSecs);
             updateUI({ preserveActiveInput: !commit });
         } else if (commit) {
@@ -418,13 +427,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         bindSelectOnFocus(el);
-        el.addEventListener('keydown', e => {
-            if (e.key === 'Enter') e.target.blur();
-        });
+        bindBlurOnEnter(el);
     });
 
     // Stopwatch-style Race Time inputs (giant numeric keypad + live automatic colons while typing)
     function bindStopwatchTimeInput(input, getDistanceKm) {
+        const defaultPlaceholder = input.placeholder;
+
         function snapCaretToEnd() {
             try {
                 const len = input.value.length;
@@ -440,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         input.addEventListener('input', () => {
-            const formatted = window.logic.formatTimeInput(input.value);
+            const formatted = logic.formatTimeInput(input.value);
             if (input.value !== formatted) {
                 input.value = formatted;
             }
@@ -450,33 +459,28 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('click', snapCaretToEnd);
 
         input.addEventListener('blur', () => {
+            input.placeholder = defaultPlaceholder;
             const distanceKm = getDistanceKm();
-            const totalSecs = window.logic.parseTime(input.value);
+            const totalSecs = logic.parseTime(input.value);
             if (distanceKm > 0 && totalSecs > 0) {
-                const requiredPaceSecs = window.logic.calculatePaceFromTimeAndDistance(totalSecs, distanceKm, currentUnit);
+                const requiredPaceSecs = logic.calculatePaceFromTimeAndDistance(totalSecs, distanceKm, currentUnit);
                 setPaceFromEdit(requiredPaceSecs);
             }
             updateUI();
         });
 
-        input.addEventListener('keydown', e => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                input.blur();
-            }
-        });
+        bindBlurOnEnter(input);
     }
 
     raceTimeInputs.forEach(input => {
         const distKey = input.dataset.dist;
-        bindStopwatchTimeInput(input, () => window.logic.raceDistancesKm[distKey] || 0);
+        bindStopwatchTimeInput(input, () => logic.raceDistancesKm[distKey] || 0);
 
-        // Make the entire race row tappable while running
+        // Make the entire race card tappable while running without double-firing native <label>
         const row = input.closest('.race-item');
         if (row) {
-            row.style.cursor = 'pointer';
             row.addEventListener('click', e => {
-                if (e.target !== input) {
+                if (!e.target.closest('input, label, button')) {
                     input.focus();
                 }
             });
@@ -485,22 +489,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Custom Distance Row
     inputCustomDist.addEventListener('input', () => {
+        const val = logic.parseDecimal(inputCustomDist.value);
+        if (!isNaN(val) && val > 0) {
+            lastValidCustomDist = inputCustomDist.value.trim();
+        }
         updateUI({ preserveActiveInput: true });
     });
-    inputCustomDist.addEventListener('change', () => updateUI());
-    bindSelectOnFocus(inputCustomDist);
-    inputCustomDist.addEventListener('keydown', e => {
-        if (e.key === 'Enter') e.target.blur();
+    inputCustomDist.addEventListener('blur', () => {
+        const val = logic.parseDecimal(inputCustomDist.value);
+        if (!isNaN(val) && val > 0) {
+            lastValidCustomDist = inputCustomDist.value.trim();
+        } else {
+            inputCustomDist.value = lastValidCustomDist;
+        }
+        updateUI();
     });
+    bindSelectOnFocus(inputCustomDist);
+    bindBlurOnEnter(inputCustomDist);
 
     btnCustomUnit.addEventListener('click', () => {
+        commitActiveInput();
         customDistUnit = customDistUnit === 'mi' ? 'km' : 'mi';
         updateUI();
     });
 
     bindStopwatchTimeInput(timeCustom, getCustomDistanceKm);
 
-    // Tabs (click, keyboard arrows, horizontal-dominant touch swipe, and directional slide/fade)
+    // Tabs (click, keyboard arrows/Home/End, horizontal-dominant single-finger touch swipe, and directional slide/fade)
     const tabNav = document.querySelector('.tab-navigation');
     const tabBtns = document.querySelectorAll('.tab-nav-btn');
     const tabViews = document.querySelectorAll('.tab-view');
@@ -513,11 +528,56 @@ document.addEventListener('DOMContentLoaded', () => {
         'tab-leave-right'
     ];
     let tabCleanupTimer = null;
+    let activeTouchId = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let swipeIgnore = false;
+    let swipeAxis = null;
+    let activeDragView = null;
+    let dragSnapTimer = null;
+    const mainArea = document.querySelector('main');
 
     function clearTabAnimationClasses() {
         tabViews.forEach(view => {
             view.classList.remove(...TAB_ANIM_CLASSES);
         });
+    }
+
+    function clearDragStyles(view) {
+        if (!view) return;
+        view.style.transform = '';
+        view.style.opacity = '';
+        view.style.transition = '';
+    }
+
+    function resetPillDrag() {
+        if (!tabNav) return;
+        tabNav.classList.remove('is-dragging');
+        tabNav.style.removeProperty('--tab-pill-drag');
+    }
+
+    function cancelActiveSwipeDrag(springBack = false) {
+        resetPillDrag();
+        if (dragSnapTimer) {
+            clearTimeout(dragSnapTimer);
+            dragSnapTimer = null;
+        }
+        if (!activeDragView) return;
+
+        const viewToReset = activeDragView;
+        activeDragView = null;
+
+        if (springBack) {
+            viewToReset.style.transition = 'transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease';
+            viewToReset.style.transform = 'translate3d(0, 0, 0)';
+            viewToReset.style.opacity = '1';
+            dragSnapTimer = setTimeout(() => {
+                dragSnapTimer = null;
+                clearDragStyles(viewToReset);
+            }, 190);
+        } else {
+            clearDragStyles(viewToReset);
+        }
     }
 
     function switchTab(targetId, focusTab = false) {
@@ -544,6 +604,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentView && currentView.contains(document.activeElement) && document.activeElement.blur) {
             document.activeElement.blur();
         }
+
+        cancelActiveSwipeDrag(false);
+        tabViews.forEach(clearDragStyles);
 
         if (tabCleanupTimer) {
             clearTimeout(tabCleanupTimer);
@@ -593,58 +656,63 @@ document.addEventListener('DOMContentLoaded', () => {
     tabBtns.forEach((btn, idx) => {
         btn.addEventListener('click', () => switchTab(btn.dataset.target));
         btn.addEventListener('keydown', e => {
-            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+            let nextIdx = null;
+            if (e.key === 'ArrowRight') {
+                nextIdx = (idx + 1) % tabBtns.length;
+            } else if (e.key === 'ArrowLeft') {
+                nextIdx = (idx - 1 + tabBtns.length) % tabBtns.length;
+            } else if (e.key === 'Home') {
+                nextIdx = 0;
+            } else if (e.key === 'End') {
+                nextIdx = tabBtns.length - 1;
+            }
+            if (nextIdx !== null) {
                 e.preventDefault();
-                const nextIdx = e.key === 'ArrowRight'
-                    ? (idx + 1) % tabBtns.length
-                    : (idx - 1 + tabBtns.length) % tabBtns.length;
                 switchTab(tabBtns[nextIdx].dataset.target, true);
             }
         });
     });
 
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let swipeIgnore = false;
-    let swipeAxis = null;
-    let activeDragView = null;
-    let dragSnapTimer = null;
-    const mainArea = document.querySelector('main');
-
-    function clearDragStyles(view) {
-        if (!view) return;
-        view.style.transform = '';
-        view.style.opacity = '';
-        view.style.transition = '';
-    }
-
-    function resetPillDrag() {
-        if (!tabNav) return;
-        tabNav.classList.remove('is-dragging');
-        tabNav.style.removeProperty('--tab-pill-drag');
+    function findTrackedTouch(touchList) {
+        if (activeTouchId === null) return null;
+        for (let i = 0; i < touchList.length; i++) {
+            if (touchList[i].identifier === activeTouchId) {
+                return touchList[i];
+            }
+        }
+        return null;
     }
 
     mainArea.addEventListener('touchstart', e => {
+        if (e.touches.length > 1) {
+            swipeIgnore = true;
+            activeTouchId = null;
+            cancelActiveSwipeDrag(true);
+            return;
+        }
+        const touch = e.changedTouches[0];
         const target = e.target;
         swipeIgnore = Boolean(target && target.closest('input, .adjust-btn'));
         swipeAxis = null;
-        if (dragSnapTimer) {
-            clearTimeout(dragSnapTimer);
-            dragSnapTimer = null;
-        }
-        if (activeDragView) {
-            clearDragStyles(activeDragView);
-            activeDragView = null;
-        }
-        resetPillDrag();
-        touchStartX = e.changedTouches[0].clientX;
-        touchStartY = e.changedTouches[0].clientY;
+        activeTouchId = touch.identifier;
+        cancelActiveSwipeDrag(false);
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
     }, { passive: true });
 
     mainArea.addEventListener('touchmove', e => {
         if (swipeIgnore) return;
-        const dx = e.changedTouches[0].clientX - touchStartX;
-        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (e.touches.length > 1) {
+            swipeIgnore = true;
+            activeTouchId = null;
+            cancelActiveSwipeDrag(true);
+            return;
+        }
+        const touch = findTrackedTouch(e.changedTouches);
+        if (!touch) return;
+
+        const dx = touch.clientX - touchStartX;
+        const dy = touch.clientY - touchStartY;
 
         if (swipeAxis === null) {
             if (Math.hypot(dx, dy) < 10) return;
@@ -673,17 +741,25 @@ document.addEventListener('DOMContentLoaded', () => {
         activeTab.style.transform = `translate3d(${offsetX.toFixed(1)}px, 0, 0)`;
         activeTab.style.opacity = opacity.toFixed(3);
 
-        if (tabNav && canSwitch) {
-            const pillNudge = Math.max(-18, Math.min(18, -dx * 0.14));
-            tabNav.classList.add('is-dragging');
-            tabNav.style.setProperty('--tab-pill-drag', `${pillNudge.toFixed(1)}px`);
+        if (tabNav) {
+            if (canSwitch) {
+                const pillNudge = Math.max(-18, Math.min(18, -dx * 0.14));
+                tabNav.classList.add('is-dragging');
+                tabNav.style.setProperty('--tab-pill-drag', `${pillNudge.toFixed(1)}px`);
+            } else {
+                resetPillDrag();
+            }
         }
     }, { passive: true });
 
     function finishTouchSwipe(e, cancelled = false) {
         if (swipeIgnore) return;
-        const dx = e.changedTouches[0].clientX - touchStartX;
-        const dy = e.changedTouches[0].clientY - touchStartY;
+        const touch = findTrackedTouch(e.changedTouches);
+        if (!touch) return;
+        activeTouchId = null;
+
+        const dx = touch.clientX - touchStartX;
+        const dy = touch.clientY - touchStartY;
         const threshold = 55;
         const activeTab = activeDragView || document.querySelector('.tab-view.active');
 
@@ -709,17 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Smoothly spring back if gesture didn't cross tab switch threshold
-        if (activeDragView) {
-            const viewToReset = activeDragView;
-            activeDragView = null;
-            viewToReset.style.transition = 'transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease';
-            viewToReset.style.transform = 'translate3d(0, 0, 0)';
-            viewToReset.style.opacity = '1';
-            dragSnapTimer = setTimeout(() => {
-                dragSnapTimer = null;
-                clearDragStyles(viewToReset);
-            }, 190);
-        }
+        cancelActiveSwipeDrag(true);
     }
 
     mainArea.addEventListener('touchend', e => finishTouchSwipe(e, false), { passive: true });
@@ -737,8 +803,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function syncSelectedDistanceRow() {
-        const km = parseDecimal(inputDistKm.value);
-        const miles = parseDecimal(inputDistMiles.value);
+        const km = logic.parseDecimal(inputDistKm.value);
+        const miles = logic.parseDecimal(inputDistMiles.value);
         distanceRows.forEach(row => {
             let matches = false;
             if (row.dataset.km && !isNaN(km)) {
@@ -747,20 +813,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 matches = Math.abs(miles - Number(row.dataset.mi)) < 0.0005;
             }
             row.classList.toggle('selected', matches);
+            row.setAttribute('aria-pressed', String(matches));
         });
     }
 
     function updateDistancesFromMiles(save = true) {
-        const miles = parseDecimal(inputDistMiles.value);
+        const miles = logic.parseDecimal(inputDistMiles.value);
         if (!isNaN(miles) && miles >= 0) {
-            const km = window.logic.convertMilesToKm(miles);
-            inputDistKm.value = parseFloat(km.toFixed(3));
+            converterDistKm = logic.convertMilesToKm(miles);
+            inputDistKm.value = parseFloat(converterDistKm.toFixed(3));
+            if (save && miles > 0) {
+                storage.set('distValue', inputDistMiles.value.trim());
+                storage.set('distUnit', 'mi');
+            }
         } else {
+            converterDistKm = 0;
             inputDistKm.value = '';
-        }
-        if (save) {
-            storage.set('distValue', inputDistMiles.value);
-            storage.set('distUnit', 'mi');
         }
         syncDistanceInputFontSize();
         syncSelectedDistanceRow();
@@ -768,36 +836,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateDistancesFromKm(save = true) {
-        const km = parseDecimal(inputDistKm.value);
+        const km = logic.parseDecimal(inputDistKm.value);
         if (!isNaN(km) && km >= 0) {
-            const miles = window.logic.convertKmToMiles(km);
+            converterDistKm = km;
+            const miles = logic.convertKmToMiles(km);
             inputDistMiles.value = parseFloat(miles.toFixed(3));
+            if (save && km > 0) {
+                storage.set('distValue', inputDistKm.value.trim());
+                storage.set('distUnit', 'km');
+            }
         } else {
+            converterDistKm = 0;
             inputDistMiles.value = '';
-        }
-        if (save) {
-            storage.set('distValue', inputDistKm.value);
-            storage.set('distUnit', 'km');
         }
         syncDistanceInputFontSize();
         syncSelectedDistanceRow();
         updateDistPaceSummary();
     }
 
+    function cleanInvalidDistanceOnBlur(inputEl) {
+        if (inputEl.value !== '' && isNaN(logic.parseDecimal(inputEl.value))) {
+            inputEl.value = '';
+            syncDistanceInputFontSize();
+        }
+    }
+
     inputDistMiles.addEventListener('input', () => updateDistancesFromMiles(true));
     inputDistKm.addEventListener('input', () => updateDistancesFromKm(true));
+    inputDistMiles.addEventListener('blur', () => cleanInvalidDistanceOnBlur(inputDistMiles));
+    inputDistKm.addEventListener('blur', () => cleanInvalidDistanceOnBlur(inputDistKm));
 
     bindSelectOnFocus(inputDistMiles);
     bindSelectOnFocus(inputDistKm);
-    inputDistMiles.addEventListener('keydown', e => {
-        if (e.key === 'Enter') e.target.blur();
-    });
-    inputDistKm.addEventListener('keydown', e => {
-        if (e.key === 'Enter') e.target.blur();
-    });
+    bindBlurOnEnter(inputDistMiles);
+    bindBlurOnEnter(inputDistKm);
 
     // Clickable & keyboard-accessible Common Distance rows using exact canonical units
     function selectDistanceRow(row) {
+        commitActiveInput();
         if (row.dataset.km) {
             inputDistKm.value = parseFloat(Number(row.dataset.km).toFixed(4));
             updateDistancesFromKm(true);
@@ -809,12 +885,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     distanceRows.forEach(row => {
         row.addEventListener('click', () => selectDistanceRow(row));
-        row.addEventListener('keydown', e => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                selectDistanceRow(row);
-            }
-        });
     });
 
     // Show All / Show Fewer Distances toggle
@@ -834,7 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
         root.classList.toggle('theme-light', !isDark);
         themeToggleBtn.setAttribute('aria-pressed', String(isDark));
         if (metaThemeColor) {
-            metaThemeColor.setAttribute('content', isDark ? '#0b1120' : '#eef2f7');
+            metaThemeColor.setAttribute('content', isDark ? THEME_COLORS.dark : THEME_COLORS.light);
         }
     }
 
@@ -864,35 +934,36 @@ document.addEventListener('DOMContentLoaded', () => {
         storage.set('theme', newIsDark ? 'dark' : 'light');
     });
 
-    initTheme();
-
-    // Initial render
-    loadState();
-    updateUI();
-
     // Restore saved converter distance without unit rounding drift (defaulting to 5 km on fresh startup)
-    const DEFAULT_DIST_KM = '5';
-    const savedDistValue = storage.get('distValue');
-    const savedDistUnit = storage.get('distUnit');
-    if (savedDistValue !== null && savedDistValue.trim() !== '' && parseDecimal(savedDistValue) > 0) {
-        if (savedDistUnit === 'km') {
-            inputDistKm.value = savedDistValue;
-            updateDistancesFromKm(false);
-        } else {
-            inputDistMiles.value = savedDistValue;
-            updateDistancesFromMiles(false);
+    function initConverterDistance() {
+        const savedDistValue = storage.get('distValue');
+        const savedDistUnit = storage.get('distUnit');
+        if (savedDistValue !== null && logic.parseDecimal(savedDistValue) > 0) {
+            if (savedDistUnit === 'km') {
+                inputDistKm.value = savedDistValue;
+                updateDistancesFromKm(false);
+            } else {
+                inputDistMiles.value = savedDistValue;
+                updateDistancesFromMiles(false);
+            }
+            return;
         }
-    } else {
+
         // Backwards compatibility with legacy distMiles key, falling back to 5K default
         const legacyMiles = storage.get('distMiles');
-        if (legacyMiles && parseDecimal(legacyMiles) > 0) {
+        if (legacyMiles && logic.parseDecimal(legacyMiles) > 0) {
             inputDistMiles.value = legacyMiles;
             updateDistancesFromMiles(true);
         } else {
-            inputDistKm.value = DEFAULT_DIST_KM;
+            inputDistKm.value = DEFAULT_CONVERTER_KM;
             updateDistancesFromKm(false);
         }
     }
+
+    initTheme();
+    loadState();
+    initConverterDistance();
+    updateUI();
 });
 
 if ('serviceWorker' in navigator) {

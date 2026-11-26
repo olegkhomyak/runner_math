@@ -1,19 +1,30 @@
 // Pure running math & formatting functions
 const MILES_TO_KM_EXACT = 1.609344;
 
+// Parse non-negative decimal input strings (supporting '.' or ',' decimal separators, rejecting Infinity/junk)
+function parseDecimal(raw) {
+    if (typeof raw !== 'string') return NaN;
+    const normalized = raw.trim().replace(',', '.');
+    if (!/^(?:\d+\.?\d*|\.\d+)$/.test(normalized)) return NaN;
+    const num = Number(normalized);
+    return Number.isFinite(num) ? num : NaN;
+}
+
 // Convert pace given in seconds per unit to the other unit
 // If fromUnit is 'mi', output is seconds per km
 // If fromUnit is 'km', output is seconds per mi
 function convertPace(seconds, fromUnit) {
-    if (fromUnit === 'mi') {
-        return seconds / MILES_TO_KM_EXACT;
+    if (!Number.isFinite(seconds) || seconds <= 0) {
+        return 0;
     }
-    return seconds * MILES_TO_KM_EXACT;
+    return fromUnit === 'mi'
+        ? seconds / MILES_TO_KM_EXACT
+        : seconds * MILES_TO_KM_EXACT;
 }
 
 // Calculate finish time (in seconds) for a given distance in kilometers based on pace
 function calculateFinishTime(paceSeconds, paceUnit, distanceKm) {
-    if (!paceSeconds || paceSeconds <= 0 || !distanceKm || distanceKm <= 0) {
+    if (!Number.isFinite(paceSeconds) || paceSeconds <= 0 || !Number.isFinite(distanceKm) || distanceKm <= 0) {
         return 0;
     }
     const pacePerKm = paceUnit === 'mi' ? paceSeconds / MILES_TO_KM_EXACT : paceSeconds;
@@ -21,28 +32,25 @@ function calculateFinishTime(paceSeconds, paceUnit, distanceKm) {
 }
 
 function convertMilesToKm(miles) {
-    return miles * MILES_TO_KM_EXACT;
+    return Number.isFinite(miles) ? miles * MILES_TO_KM_EXACT : 0;
 }
 
 function convertKmToMiles(km) {
-    return km / MILES_TO_KM_EXACT;
+    return Number.isFinite(km) ? km / MILES_TO_KM_EXACT : 0;
 }
 
 // Calculate pace (in seconds per outUnit) required for a specific distance (km) and target time (seconds)
 function calculatePaceFromTimeAndDistance(timeSecs, distanceKm, outUnit) {
-    if (!timeSecs || timeSecs <= 0 || !distanceKm || distanceKm <= 0) {
+    if (!Number.isFinite(timeSecs) || timeSecs <= 0 || !Number.isFinite(distanceKm) || distanceKm <= 0) {
         return 0;
     }
     const kmPaceSecs = timeSecs / distanceKm;
-    if (outUnit === 'km') {
-        return kmPaceSecs;
-    }
-    return convertPace(kmPaceSecs, 'km');
+    return outUnit === 'km' ? kmPaceSecs : convertPace(kmPaceSecs, 'km');
 }
 
 // Convert pace (seconds per paceUnit) into speed ('mph' or 'kmh')
 function paceToSpeed(paceSeconds, paceUnit, speedUnit) {
-    if (!paceSeconds || paceSeconds <= 0) {
+    if (!Number.isFinite(paceSeconds) || paceSeconds <= 0) {
         return 0;
     }
     const targetPaceUnit = speedUnit === 'mph' ? 'mi' : 'km';
@@ -52,7 +60,7 @@ function paceToSpeed(paceSeconds, paceUnit, speedUnit) {
 
 // Convert speed ('mph' or 'kmh') into pace (seconds per outPaceUnit: 'mi' or 'km')
 function speedToPace(speed, speedUnit, outPaceUnit) {
-    if (!speed || speed <= 0 || isNaN(speed)) {
+    if (!Number.isFinite(speed) || speed <= 0) {
         return 0;
     }
     const sourcePaceUnit = speedUnit === 'mph' ? 'mi' : 'km';
@@ -62,7 +70,7 @@ function speedToPace(speed, speedUnit, outPaceUnit) {
 
 // Format seconds into MM:SS or H:MM:SS
 function formatTime(totalSeconds) {
-    if (!isFinite(totalSeconds) || totalSeconds < 0) {
+    if (!Number.isFinite(totalSeconds) || totalSeconds < 0) {
         return '00:00';
     }
     let h = Math.floor(totalSeconds / 3600);
@@ -141,6 +149,7 @@ const raceDistancesKm = {
 
 const exported = {
     MILES_TO_KM_EXACT,
+    parseDecimal,
     convertPace,
     calculateFinishTime,
     calculatePaceFromTimeAndDistance,
@@ -154,8 +163,9 @@ const exported = {
     raceDistancesKm
 };
 
+if (typeof window !== 'undefined') {
+    window.logic = exported;
+}
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = exported;
-} else {
-    window.logic = exported;
 }

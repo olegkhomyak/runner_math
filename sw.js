@@ -1,5 +1,5 @@
 // Keep version synced with .version-badge in index.html
-const CACHE_NAME = 'runner-math-v1.3';
+const CACHE_NAME = 'runner-math-v1.3.1';
 const urlsToCache = [
   './',
   './styles.css',
@@ -51,14 +51,19 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
-  const isLocalDev = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
+  const isLocalDev =
+    self.location.hostname === 'localhost' ||
+    self.location.hostname === '127.0.0.1' ||
+    self.location.hostname === '[::1]';
   if (isLocalDev) {
+    const target = event.request.mode === 'navigate' ? './' : event.request;
     event.respondWith(
-      fetch(event.request.mode === 'navigate' ? './' : event.request)
+      fetch(target)
         .then(cleanResponse)
-        .catch(() => caches.open(CACHE_NAME).then(cache =>
-          cache.match(event.request.mode === 'navigate' ? './' : event.request, { ignoreSearch: true })
-        ))
+        .catch(() => caches.open(CACHE_NAME)
+          .then(cache => cache.match(target, { ignoreSearch: true }))
+          .then(cached => cached || Response.error())
+        )
     );
     return;
   }
@@ -69,7 +74,6 @@ self.addEventListener('fetch', event => {
       caches.open(CACHE_NAME)
         .then(cache => cache.match('./'))
         .then(cached => cached || fetch('./').then(cleanResponse))
-        .then(cleanResponse)
     );
     return;
   }
