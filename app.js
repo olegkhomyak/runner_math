@@ -79,14 +79,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const distanceGrid = document.getElementById('distance-grid');
     const distanceRows = document.querySelectorAll('.distance-row');
 
+    function parseDecimal(raw) {
+        if (typeof raw !== 'string') return NaN;
+        const normalized = raw.trim().replace(',', '.');
+        return normalized === '' ? NaN : parseFloat(normalized);
+    }
+
     function getCustomDistanceKm() {
-        const val = parseFloat(inputCustomDist.value);
+        const val = parseDecimal(inputCustomDist.value);
         if (isNaN(val) || val <= 0) return 0;
         return customDistUnit === 'mi' ? window.logic.convertMilesToKm(val) : val;
     }
 
     function updateDistPaceSummary() {
-        const km = parseFloat(inputDistKm.value);
+        const km = parseDecimal(inputDistKm.value);
         if (!isNaN(km) && km > 0) {
             distSummaryPace.textContent = `${window.logic.formatTime(currentPaceSeconds)}/${currentUnit}`;
             const finishSecs = window.logic.calculateFinishTime(currentPaceSeconds, currentUnit, km);
@@ -109,8 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const savedCustomDist = storage.get('customDistValue');
-        if (savedCustomDist !== null) {
+        if (savedCustomDist !== null && savedCustomDist.trim() !== '' && parseDecimal(savedCustomDist) > 0) {
             inputCustomDist.value = savedCustomDist;
+        } else {
+            inputCustomDist.value = '10';
         }
         const savedCustomUnit = storage.get('customDistUnit');
         if (savedCustomUnit === 'mi' || savedCustomUnit === 'km') {
@@ -379,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Treadmill speed inputs (mph & km/h)
     function handleSpeedInput(inputEl, speedUnit, commit) {
-        const speed = parseFloat(inputEl.value);
+        const speed = parseDecimal(inputEl.value);
         if (!isNaN(speed) && speed > 0) {
             const paceSecs = window.logic.speedToPace(speed, speedUnit, currentUnit);
             setPaceFromEdit(paceSecs);
@@ -393,9 +401,22 @@ document.addEventListener('DOMContentLoaded', () => {
         [inputMph, 'mph'],
         [inputKmh, 'kmh']
     ].forEach(([el, unit]) => {
-        el.addEventListener('input', () => handleSpeedInput(el, unit, false));
-        el.addEventListener('change', () => handleSpeedInput(el, unit, true));
-        el.addEventListener('blur', () => handleSpeedInput(el, unit, true));
+        let dirty = false;
+        el.addEventListener('focus', () => {
+            dirty = false;
+        });
+        el.addEventListener('input', () => {
+            dirty = true;
+            handleSpeedInput(el, unit, false);
+        });
+        el.addEventListener('blur', () => {
+            if (dirty) {
+                dirty = false;
+                handleSpeedInput(el, unit, true);
+            } else {
+                updateUI();
+            }
+        });
         bindSelectOnFocus(el);
         el.addEventListener('keydown', e => {
             if (e.key === 'Enter') e.target.blur();
@@ -479,11 +500,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bindStopwatchTimeInput(timeCustom, getCustomDistanceKm);
 
-    // Tabs (click, keyboard arrows, and horizontal-dominant touch swipe)
+    // Tabs (click, keyboard arrows, horizontal-dominant touch swipe, and directional slide/fade)
+    const tabNav = document.querySelector('.tab-navigation');
     const tabBtns = document.querySelectorAll('.tab-nav-btn');
     const tabViews = document.querySelectorAll('.tab-view');
+    const tabOrder = ['tab-pace', 'tab-distance'];
+    const TAB_ANIM_CLASSES = [
+        'tab-leaving',
+        'tab-enter-right',
+        'tab-enter-left',
+        'tab-leave-left',
+        'tab-leave-right'
+    ];
+    let tabCleanupTimer = null;
+
+    function clearTabAnimationClasses() {
+        tabViews.forEach(view => {
+            view.classList.remove(...TAB_ANIM_CLASSES);
+        });
+    }
 
     function switchTab(targetId, focusTab = false) {
+        const currentView = document.querySelector('.tab-view.active');
+        const currentId = currentView ? currentView.id : null;
+
         tabBtns.forEach(b => {
             const isSelected = b.dataset.target === targetId;
             b.classList.toggle('active', isSelected);
@@ -494,11 +534,60 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        if (tabNav) {
+            tabNav.dataset.activeTab = targetId;
+        }
+
+        if (currentId === targetId) return;
+
+        // Commit any active input edit & dismiss mobile keyboard cleanly before leaving current tab
+        if (currentView && currentView.contains(document.activeElement) && document.activeElement.blur) {
+            document.activeElement.blur();
+        }
+
+        if (tabCleanupTimer) {
+            clearTimeout(tabCleanupTimer);
+            tabCleanupTimer = null;
+        }
+        clearTabAnimationClasses();
+
+        const targetView = document.getElementById(targetId);
+        const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (!currentView || !targetView || prefersReducedMotion) {
+            tabViews.forEach(view => {
+                const isTarget = view.id === targetId;
+                view.classList.toggle('active', isTarget);
+                view.classList.toggle('hidden', !isTarget);
+            });
+            return;
+        }
+
+        const movingForward = tabOrder.indexOf(targetId) > tabOrder.indexOf(currentId);
+
         tabViews.forEach(view => {
-            const isTarget = view.id === targetId;
-            view.classList.toggle('active', isTarget);
-            view.classList.toggle('hidden', !isTarget);
+            if (view !== currentView && view !== targetView) {
+                view.classList.remove('active');
+                view.classList.add('hidden');
+            }
         });
+
+        currentView.classList.remove('active');
+        currentView.classList.add('tab-leaving', movingForward ? 'tab-leave-left' : 'tab-leave-right');
+
+        targetView.classList.remove('hidden');
+        // Force reflow so rapid back-and-forth switches cleanly restart keyframe animations
+        void targetView.offsetWidth;
+        targetView.classList.add('active', movingForward ? 'tab-enter-right' : 'tab-enter-left');
+
+        tabCleanupTimer = setTimeout(() => {
+            tabCleanupTimer = null;
+            tabViews.forEach(view => {
+                const isActive = view.classList.contains('active');
+                view.classList.toggle('hidden', !isActive);
+                view.classList.remove(...TAB_ANIM_CLASSES);
+            });
+        }, 270);
     }
 
     tabBtns.forEach((btn, idx) => {
@@ -517,36 +606,152 @@ document.addEventListener('DOMContentLoaded', () => {
     let touchStartX = 0;
     let touchStartY = 0;
     let swipeIgnore = false;
+    let swipeAxis = null;
+    let activeDragView = null;
+    let dragSnapTimer = null;
     const mainArea = document.querySelector('main');
+
+    function clearDragStyles(view) {
+        if (!view) return;
+        view.style.transform = '';
+        view.style.opacity = '';
+        view.style.transition = '';
+    }
+
+    function resetPillDrag() {
+        if (!tabNav) return;
+        tabNav.classList.remove('is-dragging');
+        tabNav.style.removeProperty('--tab-pill-drag');
+    }
 
     mainArea.addEventListener('touchstart', e => {
         const target = e.target;
-        swipeIgnore = Boolean(target && target.closest('input'));
+        swipeIgnore = Boolean(target && target.closest('input, .adjust-btn'));
+        swipeAxis = null;
+        if (dragSnapTimer) {
+            clearTimeout(dragSnapTimer);
+            dragSnapTimer = null;
+        }
+        if (activeDragView) {
+            clearDragStyles(activeDragView);
+            activeDragView = null;
+        }
+        resetPillDrag();
         touchStartX = e.changedTouches[0].clientX;
         touchStartY = e.changedTouches[0].clientY;
     }, { passive: true });
 
-    mainArea.addEventListener('touchend', e => {
+    mainArea.addEventListener('touchmove', e => {
         if (swipeIgnore) return;
         const dx = e.changedTouches[0].clientX - touchStartX;
         const dy = e.changedTouches[0].clientY - touchStartY;
-        const threshold = 60;
 
-        // Require horizontal movement > threshold AND clearly dominant over vertical scroll
-        if (Math.abs(dx) > threshold && Math.abs(dx) > Math.abs(dy) * 1.5) {
-            const activeTab = document.querySelector('.tab-view.active');
-            if (!activeTab) return;
-            if (dx < 0 && activeTab.id === 'tab-pace') {
-                switchTab('tab-distance');
-            } else if (dx > 0 && activeTab.id === 'tab-distance') {
-                switchTab('tab-pace');
-            }
+        if (swipeAxis === null) {
+            if (Math.hypot(dx, dy) < 10) return;
+            swipeAxis = Math.abs(dx) > Math.abs(dy) * 1.35 ? 'x' : 'y';
+        }
+        if (swipeAxis !== 'x') return;
+
+        const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) return;
+
+        const activeTab = document.querySelector('.tab-view.active');
+        if (!activeTab) return;
+        activeDragView = activeTab;
+
+        const canSwipeLeft = activeTab.id === 'tab-pace' && dx < 0;
+        const canSwipeRight = activeTab.id === 'tab-distance' && dx > 0;
+        const canSwitch = canSwipeLeft || canSwipeRight;
+
+        // Responsive finger follow toward adjacent tab; subtle rubber-band resistance at outer edges
+        const offsetX = canSwitch
+            ? Math.max(-44, Math.min(44, dx * 0.34))
+            : Math.max(-12, Math.min(12, dx * 0.09));
+        const opacity = canSwitch ? Math.max(0.82, 1 - Math.abs(dx) / 520) : 1;
+
+        activeTab.style.transition = 'none';
+        activeTab.style.transform = `translate3d(${offsetX.toFixed(1)}px, 0, 0)`;
+        activeTab.style.opacity = opacity.toFixed(3);
+
+        if (tabNav && canSwitch) {
+            const pillNudge = Math.max(-18, Math.min(18, -dx * 0.14));
+            tabNav.classList.add('is-dragging');
+            tabNav.style.setProperty('--tab-pill-drag', `${pillNudge.toFixed(1)}px`);
         }
     }, { passive: true });
 
+    function finishTouchSwipe(e, cancelled = false) {
+        if (swipeIgnore) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        const threshold = 55;
+        const activeTab = activeDragView || document.querySelector('.tab-view.active');
+
+        resetPillDrag();
+
+        const shouldSwitch = !cancelled &&
+            (swipeAxis === 'x' || Math.abs(dx) > Math.abs(dy) * 1.5) &&
+            Math.abs(dx) > threshold;
+
+        if (shouldSwitch && activeTab) {
+            if (dx < 0 && activeTab.id === 'tab-pace') {
+                clearDragStyles(activeTab);
+                activeDragView = null;
+                switchTab('tab-distance');
+                return;
+            }
+            if (dx > 0 && activeTab.id === 'tab-distance') {
+                clearDragStyles(activeTab);
+                activeDragView = null;
+                switchTab('tab-pace');
+                return;
+            }
+        }
+
+        // Smoothly spring back if gesture didn't cross tab switch threshold
+        if (activeDragView) {
+            const viewToReset = activeDragView;
+            activeDragView = null;
+            viewToReset.style.transition = 'transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease';
+            viewToReset.style.transform = 'translate3d(0, 0, 0)';
+            viewToReset.style.opacity = '1';
+            dragSnapTimer = setTimeout(() => {
+                dragSnapTimer = null;
+                clearDragStyles(viewToReset);
+            }, 190);
+        }
+    }
+
+    mainArea.addEventListener('touchend', e => finishTouchSwipe(e, false), { passive: true });
+    mainArea.addEventListener('touchcancel', e => finishTouchSwipe(e, true), { passive: true });
+
     // Distance Converter
+    function syncDistanceInputFontSize() {
+        const milesLen = (inputDistMiles.value || inputDistMiles.placeholder || '').length;
+        const kmLen = (inputDistKm.value || inputDistKm.placeholder || '').length;
+        const maxLen = Math.max(milesLen, kmLen);
+        const scale = maxLen > 5 ? Math.max(0.52, 5.4 / maxLen) : 1;
+        const scaleStr = scale.toFixed(3);
+        inputDistMiles.style.setProperty('--dist-font-scale', scaleStr);
+        inputDistKm.style.setProperty('--dist-font-scale', scaleStr);
+    }
+
+    function syncSelectedDistanceRow() {
+        const km = parseDecimal(inputDistKm.value);
+        const miles = parseDecimal(inputDistMiles.value);
+        distanceRows.forEach(row => {
+            let matches = false;
+            if (row.dataset.km && !isNaN(km)) {
+                matches = Math.abs(km - Number(row.dataset.km)) < 0.0005;
+            } else if (row.dataset.mi && !isNaN(miles)) {
+                matches = Math.abs(miles - Number(row.dataset.mi)) < 0.0005;
+            }
+            row.classList.toggle('selected', matches);
+        });
+    }
+
     function updateDistancesFromMiles(save = true) {
-        const miles = parseFloat(inputDistMiles.value);
+        const miles = parseDecimal(inputDistMiles.value);
         if (!isNaN(miles) && miles >= 0) {
             const km = window.logic.convertMilesToKm(miles);
             inputDistKm.value = parseFloat(km.toFixed(3));
@@ -557,11 +762,13 @@ document.addEventListener('DOMContentLoaded', () => {
             storage.set('distValue', inputDistMiles.value);
             storage.set('distUnit', 'mi');
         }
+        syncDistanceInputFontSize();
+        syncSelectedDistanceRow();
         updateDistPaceSummary();
     }
 
     function updateDistancesFromKm(save = true) {
-        const km = parseFloat(inputDistKm.value);
+        const km = parseDecimal(inputDistKm.value);
         if (!isNaN(km) && km >= 0) {
             const miles = window.logic.convertKmToMiles(km);
             inputDistMiles.value = parseFloat(miles.toFixed(3));
@@ -572,6 +779,8 @@ document.addEventListener('DOMContentLoaded', () => {
             storage.set('distValue', inputDistKm.value);
             storage.set('distUnit', 'km');
         }
+        syncDistanceInputFontSize();
+        syncSelectedDistanceRow();
         updateDistPaceSummary();
     }
 
@@ -661,10 +870,11 @@ document.addEventListener('DOMContentLoaded', () => {
     loadState();
     updateUI();
 
-    // Restore saved converter distance without unit rounding drift
+    // Restore saved converter distance without unit rounding drift (defaulting to 5 km on fresh startup)
+    const DEFAULT_DIST_KM = '5';
     const savedDistValue = storage.get('distValue');
     const savedDistUnit = storage.get('distUnit');
-    if (savedDistValue !== null && savedDistValue !== '') {
+    if (savedDistValue !== null && savedDistValue.trim() !== '' && parseDecimal(savedDistValue) > 0) {
         if (savedDistUnit === 'km') {
             inputDistKm.value = savedDistValue;
             updateDistancesFromKm(false);
@@ -673,11 +883,14 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDistancesFromMiles(false);
         }
     } else {
-        // Backwards compatibility with legacy distMiles key
+        // Backwards compatibility with legacy distMiles key, falling back to 5K default
         const legacyMiles = storage.get('distMiles');
-        if (legacyMiles) {
+        if (legacyMiles && parseDecimal(legacyMiles) > 0) {
             inputDistMiles.value = legacyMiles;
             updateDistancesFromMiles(true);
+        } else {
+            inputDistKm.value = DEFAULT_DIST_KM;
+            updateDistancesFromKm(false);
         }
     }
 });
@@ -686,9 +899,12 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         const toast = document.getElementById('update-toast');
         const refreshBtn = document.getElementById('btn-refresh');
+        const hadController = Boolean(navigator.serviceWorker.controller);
         let waitingWorker = null;
+        let refreshing = false;
 
         function showUpdateToast(worker) {
+            if (refreshing) return;
             waitingWorker = worker;
             if (toast) toast.classList.remove('hidden');
         }
@@ -701,7 +917,7 @@ if ('serviceWorker' in navigator) {
             });
         }
 
-        navigator.serviceWorker.register('./sw.js').then(registration => {
+        navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(registration => {
             if (registration.waiting && navigator.serviceWorker.controller) {
                 showUpdateToast(registration.waiting);
             }
@@ -711,7 +927,12 @@ if ('serviceWorker' in navigator) {
                 if (!newWorker) return;
                 newWorker.addEventListener('statechange', () => {
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        showUpdateToast(newWorker);
+                        // Avoid a 1-frame toast flash when skipWaiting() auto-activates immediately
+                        setTimeout(() => {
+                            if (!refreshing && registration.waiting === newWorker) {
+                                showUpdateToast(newWorker);
+                            }
+                        }, 200);
                     }
                 });
             });
@@ -719,10 +940,10 @@ if ('serviceWorker' in navigator) {
             console.error('SW registration failed: ', registrationError);
         });
 
-        let refreshing = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (refreshing) return;
+            if (!hadController || refreshing) return;
             refreshing = true;
+            if (toast) toast.classList.add('hidden');
             window.location.reload();
         });
     });
